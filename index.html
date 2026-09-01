@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <!-- 鎖定 Viewport，禁止縮放 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>龜記叫號取餐系統與電子菜單看板</title>
+    <style>
+        /* CSS Reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            overflow: hidden; /* 無捲軸 */
+            font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 自適應縮放容器 (鎖定 1080x1920) */
+        #viewport-container {
+            width: 1080px;
+            height: 1920px;
+            position: relative;
+            transform-origin: center center;
+            background-color: #000;
+        }
+
+        /* 上方固定 15% (288px) - 叫號橫幅 */
+        #qms-banner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1080px;
+            height: 288px;
+            background-color: #485b28; /* 龜記品牌草本橄欖綠 */
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        /* 左側 Logo 區 */
+        .logo-area {
+            width: 200px;
+            height: 200px;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .logo-area svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 中間 主叫號區 */
+        .main-number-area {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 75px;
+        }
+        #main-number {
+            color: #dbee0f; /* 亮黃/檸檬黃 */
+            font-size: 148px;
+            font-weight: 900;
+            letter-spacing: 5px;
+            white-space: nowrap;
+            line-height: 1;
+        }
+
+        /* 主號碼動畫：進場彈跳 */
+        @keyframes popIn {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            60% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .animate-call {
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* 右側 歷史號碼區 */
+        .history-area {
+            height: 100%;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+            align-items: flex-end;
+            gap: 20px;
+            padding-right: 20px;
+            padding-bottom: 75px;
+            overflow: hidden;
+        }
+        .history-item {
+            color: #fff; /* 白色 */
+            font-size: 80px;
+            font-weight: bold;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            line-height: 1;
+        }
+
+        /* 下方固定 85% (1632px) - 電子菜單 */
+        #menu-area {
+            position: absolute;
+            top: 288px;
+            left: 0;
+            width: 1080px;
+            height: 1632px;
+            background-color: #111;
+        }
+        #menu-area img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* 滿版 */
+        }
+        
+        .no-image-text {
+            color: #666;
+            text-align: center;
+            line-height: 1632px;
+            font-size: 50px;
+        }
+
+        /* 測試與除錯面板 */
+        #debug-panel {
+            position: absolute;
+            top: 300px;
+            right: 20px;
+            width: 400px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #fff;
+            border-radius: 10px;
+            padding: 20px;
+            color: #fff;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+        #debug-panel h3 {
+            margin-bottom: 15px;
+            font-size: 24px;
+            border-bottom: 1px solid #555;
+            padding-bottom: 10px;
+        }
+        .debug-row {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        #debug-panel input {
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+        }
+        #debug-panel button {
+            padding: 10px 15px;
+            font-size: 18px;
+            cursor: pointer;
+            background: #485b28;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+        #debug-panel button:hover {
+            background: #5a7232;
+        }
+        #mute-btn.muted {
+            background: #a00;
+        }
+    </style>
+</head>
+<body>
+
+<div id="viewport-container">
+    <!-- 上方 15% 叫號橫幅 -->
+    <div id="qms-banner" ondblclick="toggleDebugPanel()">
+        <!-- 左側 Logo -->
+        <div class="logo-area">
+            <svg id="_圖層_2" data-name="圖層 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 103.62 34.61">
+              <defs>
+                <style>
+                  .cls-1 { fill: #fff; }
+                </style>
+              </defs>
+              <g id="_圖層_1-2" data-name="圖層 1">
+                <g>
+                  <path class="cls-1" d="M33.88,18.34c0-6.13,4.82-10.8,10.77-10.8,3.02,0,5.47,1.11,7.3,2.96.24.24.24.48,0,.78l-2,2.12c-.21.24-.45.24-.66.06-1.26-1.05-2.75-1.73-4.61-1.73-3.68,0-6.46,2.81-6.46,6.61s2.78,6.58,6.67,6.58c3.29,0,5.23-1.94,5.32-4.31h-5.32c-.27,0-.45-.18-.45-.45v-2.9c0-.27.18-.45.45-.45h9.03c.27,0,.45.18.45.45v1.94c0,5.47-3.62,9.9-9.63,9.9s-10.86-4.64-10.86-10.77"/>
+                  <path class="cls-1" d="M59.34,23.24v-8.24c0-.26.17-.43.43-.43h3.12c.26,0,.43.17.43.43v7.34c0,1.99.92,3.06,2.63,3.06s2.77-1.07,2.77-3.06v-7.34c0-.26.17-.43.43-.43h3.09c.26,0,.46.17.46.43v13.3c0,.26-.2.43-.46.43h-2.98c-.26,0-.4-.12-.43-.46l-.12-1.68c-.81,1.45-2.17,2.49-4.28,2.49-2.98,0-5.12-2.14-5.12-5.84"/>
+                  <rect class="cls-1" x="78.53" y="14.57" width="4.02" height="14.16" rx=".43" ry=".43"/>
+                  <path class="cls-1" d="M78.22,10.54c0-1.27,1-2.31,2.34-2.31s2.31,1.03,2.31,2.31-.97,2.34-2.31,2.34-2.34-1.03-2.34-2.34"/>
+                  <path class="cls-1" d="M85.76,31.02c0-.2.17-.23.38-.2.46.09.84.14,1.19.14,1.39,0,1.71-.72,1.71-1.76v-14.19c0-.26.17-.43.43-.43h3.15c.26,0,.43.17.43.43v14.74c0,3.3-1.82,4.77-4.86,4.77-.78,0-1.39-.06-2.17-.43-.17-.09-.26-.26-.26-.43v-2.63Z"/>
+                  <path class="cls-1" d="M88.71,10.54c0-1.27,1-2.31,2.34-2.31s2.31,1.03,2.31,2.31-.97,2.34-2.31,2.34-2.34-1.03-2.34-2.34"/>
+                  <rect class="cls-1" x="99.29" y="14.57" width="4.02" height="14.16" rx=".43" ry=".43"/>
+                  <path class="cls-1" d="M98.98,10.54c0-1.27,1-2.31,2.34-2.31s2.31,1.03,2.31,2.31-.97,2.34-2.31,2.34-2.34-1.03-2.34-2.34"/>
+                  <path class="cls-1" d="M19.76,5.17c-.52-.23-.9-.69-1.01-1.24-.42-2.23-2.38-3.93-4.74-3.93s-4.32,1.69-4.74,3.93c-.1.56-.49,1.01-1.01,1.24C3.4,7.36,0,12.27,0,17.96v2.45c0,7.73,6.18,14.14,13.91,14.19,7.79.06,14.12-6.24,14.12-14.02v-2.63c0-5.69-3.4-10.6-8.27-12.79M11,18.83l2.08,2.08c.1.11.28.03.28-.12v-2.75c0-.44-.18-.86-.49-1.18l-1.95-1.95c-.26-.26-.26-.67,0-.93.26-.26.67-.26.93,0l1.22,1.22c.1.1.28.03.28-.12v-4.58c0-.38.33-.69.72-.65.34.03.59.34.59.68v4.56c0,.15.18.22.28.12l1.22-1.22c.26-.26.67-.26.93,0,.26.26.26.67,0,.93l-1.95,1.95c-.31.31-.49.74-.49,1.18v2.75c0,.15.18.22.28.12l2.1-2.1c.26-.26.67-.26.93,0s.26.67,0,.93l-2.82,2.82c-.31.31-.49.74-.49,1.18v3.42c0,.38-.33.69-.72.65-.34-.03-.59-.34-.59-.68v-3.39c0-.44-.18-.86-.49-1.18l-2.82-2.82c-.27-.27-.26-.72.05-.97.26-.22.66-.18.9.06M25.19,20.55c0,6.16-5.01,11.17-11.17,11.17S2.85,26.71,2.85,20.55v-2.52c0-4.44,2.63-8.46,6.7-10.24.33-.15.72,0,.86.34.14.33,0,.72-.34.86-3.59,1.57-5.91,5.12-5.91,9.03v2.52c0,5.43,4.42,9.86,9.86,9.86s9.86-4.42,9.86-9.86v-2.52c0-3.92-2.32-7.46-5.91-9.03-.33-.15-.48-.53-.34-.86.15-.33.53-.48.86-.34,4.07,1.78,6.7,5.8,6.7,10.24v2.52Z"/>
+                </g>
+              </g>
+            </svg>
+        </div>
+        
+        <!-- 中間 主號碼 -->
+        <div class="main-number-area">
+            <div id="main-number">---</div>
+        </div>
+        
+        <!-- 右側 歷史號碼 -->
+        <div class="history-area" id="history-area">
+            <!-- JS 動態產生 -->
+        </div>
+    </div>
+
+    <!-- 下方 85% 菜單 -->
+    <div id="menu-area">
+        <img src="assets/menu.jpg" alt="電子菜單" onerror="showNoImage(this)">
+    </div>
+
+    <!-- 測試面板 -->
+    <div id="debug-panel">
+        <h3>測試與除錯面板 (按 T 切換)</h3>
+        <div class="debug-row">
+            <input type="text" id="manual-input" placeholder="手動輸入 (例: A01)">
+            <button onclick="submitManual()">送出</button>
+        </div>
+        <div class="debug-row">
+            <button onclick="processScan('0321')">測 0321</button>
+            <button onclick="processScan('0320')">測 0320</button>
+            <button onclick="processScan('A01')">測 A01</button>
+            <button onclick="processScan('NO.88')">測 NO.88</button>
+        </div>
+        <div class="debug-row">
+            <button onclick="clearHistory()">一鍵清空</button>
+            <button onclick="toggleMute()" id="mute-btn">靜音: 關</button>
+            <button onclick="toggleDemoMode()" id="demo-btn">Demo模式: 關</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ==========================================================================
+       1. 自適應縮放邏輯
+       ========================================================================== */
+    function resizeViewport() {
+        const container = document.getElementById('viewport-container');
+        const scaleX = window.innerWidth / 1080;
+        const scaleY = window.innerHeight / 1920;
+        const scale = Math.min(scaleX, scaleY);
+        container.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', resizeViewport);
+    resizeViewport(); // 初始化
+
+    /* ==========================================================================
+       2. 狀態與儲存邏輯 (1主 + 3歷史)
+       ========================================================================== */
+    let currentMain = "---";
+    let historyList = [];
+    const MAX_HISTORY = 2;
+
+    function loadState() {
+        const savedMain = localStorage.getItem('guiji_main_number');
+        const savedHistory = localStorage.getItem('guiji_history');
+        if (savedMain) currentMain = savedMain;
+        if (savedHistory) {
+            try { 
+                historyList = JSON.parse(savedHistory); 
+                while (historyList.length > MAX_HISTORY) {
+                    historyList.pop();
+                }
+            } catch(e) {}
+        }
+        updateUI(false);
+    }
+
+    function saveState() {
+        localStorage.setItem('guiji_main_number', currentMain);
+        localStorage.setItem('guiji_history', JSON.stringify(historyList));
+    }
+
+    /* ==========================================================================
+       3. 核心處理邏輯 (掃碼槍輸入)
+       ========================================================================== */
+    function processScan(scannedNumber) {
+        if (!scannedNumber || scannedNumber.trim() === '') return;
+        scannedNumber = scannedNumber.trim().toUpperCase();
+
+        if (currentMain === scannedNumber) {
+            // 重複掃描目前主號，只需重播動畫與聲音
+            triggerEffects(scannedNumber);
+            return;
+        }
+
+        // 檢查是否在歷史紀錄中
+        const historyIndex = historyList.indexOf(scannedNumber);
+        
+        if (historyIndex !== -1) {
+            // 若在歷史中，從歷史移除
+            historyList.splice(historyIndex, 1);
+        }
+
+        if (currentMain !== "---") {
+            historyList.unshift(currentMain); // 推入最前面
+            while (historyList.length > MAX_HISTORY) {
+                historyList.pop(); // 超過數量則移除最舊
+            }
+        }
+        
+        currentMain = scannedNumber;
+        saveState();
+        updateUI(true);
+    }
+
+    function updateUI(withEffects) {
+        // 更新主號碼
+        const mainEl = document.getElementById('main-number');
+        mainEl.textContent = currentMain;
+        
+        // 自適應字級調整 (超過 4 碼縮小)
+        if (currentMain.length > 4) {
+            mainEl.style.fontSize = Math.max(80, 148 - (currentMain.length - 4) * 15) + 'px';
+        } else {
+            mainEl.style.fontSize = '148px';
+        }
+
+        // 更新歷史紀錄
+        const historyArea = document.getElementById('history-area');
+        historyArea.innerHTML = '';
+        historyList.forEach(num => {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.textContent = num;
+            historyArea.appendChild(div);
+        });
+
+        if (withEffects && currentMain !== "---") {
+            triggerEffects(currentMain);
+        }
+    }
+
+    /* ==========================================================================
+       4. 聲光回饋與動畫
+       ========================================================================== */
+    let isMuted = false;
+    // 初始化 AudioContext 需由使用者互動觸發，此處宣告
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function triggerEffects(number) {
+        // 動畫
+        const mainEl = document.getElementById('main-number');
+        mainEl.classList.remove('animate-call');
+        void mainEl.offsetWidth; // Trigger reflow
+        mainEl.classList.add('animate-call');
+
+        if (!isMuted) {
+            playDingDong();
+            speakNumber(number);
+        }
+    }
+
+    // 雙正弦波合成 Ding-Dong
+    function playDingDong() {
+        if (!audioCtx) audioCtx = new AudioContext();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const playTone = (freq, startTime, duration) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, startTime);
+            
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(0.8, startTime + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+        };
+
+        const now = audioCtx.currentTime;
+        playTone(659.25, now, 0.5);       // Ding (E5)
+        playTone(523.25, now + 0.4, 0.8); // Dong (C5)
+    }
+
+    // 語音合成
+    function speakNumber(number) {
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel(); // 停止先前的播放
+
+        // 分詞處理 (將英文與數字分開，讓念法更自然)
+        // 例如 A01 -> A 0 1, NO.88 -> N O 8 8
+        let spokenText = number.replace(/([a-zA-Z])/g, '$1 ').replace(/([0-9])/g, '$1 ').trim();
+        
+        const utterance = new SpeechSynthesisUtterance(`請，${spokenText}，取餐`);
+        utterance.lang = 'zh-TW';
+        utterance.rate = 0.85; // 稍慢，更清晰
+        window.speechSynthesis.speak(utterance);
+    }
+
+    /* ==========================================================================
+       5. 掃碼槍鍵盤監聽邏輯 (Buffer)
+       ========================================================================== */
+    let keyBuffer = '';
+    let keyTimer = null;
+
+    window.addEventListener('keydown', (e) => {
+        // 排除輸入框事件
+        if (e.target.tagName.toLowerCase() === 'input') return;
+
+        // 偵測 T 鍵切換面板
+        if (e.key.toLowerCase() === 't') {
+            toggleDebugPanel();
+            return;
+        }
+
+        // Enter 鍵送出 (Keycode 13)
+        if (e.key === 'Enter') {
+            if (keyBuffer.length > 0) {
+                processScan(keyBuffer);
+                keyBuffer = '';
+            }
+            if (keyTimer) clearTimeout(keyTimer);
+            return;
+        }
+
+        // 過濾可見字元 (英文、數字、符號)
+        if (e.key.length === 1) {
+            keyBuffer += e.key;
+            
+            // 掃碼槍通常字元間隔極短 (<50ms)
+            // 若超過 100ms 沒按鍵，視為手動輸入或中斷，清空 buffer
+            if (keyTimer) clearTimeout(keyTimer);
+            keyTimer = setTimeout(() => {
+                keyBuffer = '';
+            }, 100);
+        }
+    });
+
+    /* ==========================================================================
+       6. 除錯與其他輔助
+       ========================================================================== */
+    function toggleDebugPanel() {
+        const panel = document.getElementById('debug-panel');
+        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function submitManual() {
+        const input = document.getElementById('manual-input');
+        if (input.value) {
+            processScan(input.value);
+            input.value = '';
+        }
+    }
+
+    function clearHistory() {
+        currentMain = "---";
+        historyList = [];
+        saveState();
+        updateUI(false);
+    }
+
+    function toggleMute() {
+        isMuted = !isMuted;
+        const btn = document.getElementById('mute-btn');
+        if (isMuted) {
+            btn.textContent = '靜音: 開';
+            btn.classList.add('muted');
+        } else {
+            btn.textContent = '靜音: 關';
+            btn.classList.remove('muted');
+        }
+    }
+
+    let isDemoMode = false;
+    let demoTimer = null;
+    let currentDemoNum = 1;
+
+    function toggleDemoMode() {
+        isDemoMode = !isDemoMode;
+        const btn = document.getElementById('demo-btn');
+        if (isDemoMode) {
+            btn.textContent = 'Demo模式: 開';
+            btn.style.background = '#dbee0f';
+            btn.style.color = '#000';
+            
+            // 立即執行第一次
+            processScan(String(currentDemoNum).padStart(3, '0'));
+            
+            // 開始自動播放
+            demoTimer = setInterval(() => {
+                // 90% 依順序，10% 隨機
+                if (Math.random() < 0.9) {
+                    currentDemoNum++;
+                } else {
+                    currentDemoNum = Math.floor(Math.random() * 999) + 1;
+                }
+                if (currentDemoNum > 999) currentDemoNum = 1;
+                
+                const numStr = String(currentDemoNum).padStart(3, '0');
+                processScan(numStr);
+            }, 6000); // 每 6 秒切換一次，確保語音能播完
+        } else {
+            btn.textContent = 'Demo模式: 關';
+            btn.style.background = ''; // 恢復預設
+            btn.style.color = '';
+            if (demoTimer) {
+                clearInterval(demoTimer);
+                demoTimer = null;
+            }
+        }
+    }
+
+    function showNoImage(imgElement) {
+        imgElement.style.display = 'none';
+        const div = document.createElement('div');
+        div.className = 'no-image-text';
+        div.innerHTML = '請於 assets/ 目錄下放置 menu.jpg';
+        imgElement.parentNode.appendChild(div);
+    }
+
+    // 初始載入狀態
+    window.addEventListener('DOMContentLoaded', loadState);
+
+</script>
+</body>
+</html>

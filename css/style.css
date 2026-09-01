@@ -1,0 +1,340 @@
+/* ==========================================================================
+   龜記 (Guiji) 1080x1920 9:16 直立式叫號機與電子菜單系統樣式
+   視覺主題：龜記草本綠極簡橫向單列風格 (Guiji Herbal Green Minimalist Banner)
+   ========================================================================== */
+
+:root {
+  --screen-width: 1080px;
+  --screen-height: 1920px;
+  --header-height: 288px; /* 上方 15% (288px) */
+  --menu-height: 1632px;   /* 下方 85% (1632px) */
+  
+  /* 龜記品牌色彩定義 */
+  --guiji-green: #485b28;       /* 龜記招牌草本橄欖綠 */
+  --guiji-green-dark: #3a4b1f;  /* 深綠陰影色 */
+  --guiji-yellow: #dbee0f;      /* 亮黃/檸檬黃主號碼 */
+  --guiji-yellow-glow: rgba(219, 238, 15, 0.4);
+  --history-color: #8ed6de;     /* 歷史號碼淺青白色 */
+  
+  /* 通用色彩 */
+  --text-white: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.6);
+  
+  /* 字體族系 */
+  --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  --font-number: "Arial", -apple-system, "SF Pro Display", "Impact", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #000000;
+  font-family: var(--font-family);
+  color: var(--text-white);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* 1080x1920 鎖定畫布容器 (在 1080x1920 機上盒上為 1:1 滿版) */
+#app-container {
+  width: 1080px;
+  height: 1920px;
+  min-width: 1080px;
+  min-height: 1920px;
+  position: relative;
+  background: var(--guiji-green);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
+  transform-origin: top center;
+}
+
+/* ==========================================================================
+   頂部叫號區域 (上方固定 15%, 288px)
+   ========================================================================== */
+#qms-section {
+  width: 100%;
+  height: var(--header-height);
+  background-color: var(--guiji-green);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+}
+
+/* 頂部三欄橫向排版：左 Logo (28%) + 中主號碼 (42%) + 右歷史 (30%) */
+.qms-row {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 1. 左側：龜記 Guiji 官方品牌標誌 */
+.brand-logo-area {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.guiji-official-logo {
+  height: 96px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* 2. 中間：最新主叫號碼 (巨幅亮黃色，居中高亮) */
+.main-number-area {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.main-call-number {
+  font-family: var(--font-number);
+  font-size: 148px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--guiji-yellow);
+  letter-spacing: 2px;
+  text-align: center;
+  white-space: nowrap;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.main-call-number.waiting {
+  font-size: 64px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 700;
+  letter-spacing: 4px;
+}
+
+/* 新號碼進場動畫 */
+.main-call-number.calling {
+  animation: number-pulse-glow 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes number-pulse-glow {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.2;
+  }
+  60% {
+    transform: scale(1.18);
+    opacity: 1;
+    text-shadow: 0 0 35px var(--guiji-yellow-glow);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 3. 右側：歷史號碼序列 (橫向平鋪) */
+.history-numbers-area {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 28px;
+  flex-shrink: 0;
+  min-width: 250px;
+}
+
+.history-num-item {
+  font-family: var(--font-number);
+  font-size: 62px;
+  font-weight: 800;
+  color: var(--history-color);
+  letter-spacing: 1px;
+  white-space: nowrap;
+  opacity: 0.95;
+  transition: all 0.3s ease;
+}
+
+.history-num-item.empty {
+  opacity: 0;
+}
+
+.history-num-item.newly-pushed {
+  animation: history-slide-in 0.4s ease-out;
+}
+
+@keyframes history-slide-in {
+  0% {
+    transform: translateX(-15px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 0.95;
+  }
+}
+
+/* ==========================================================================
+   下方菜單區域 (佔 85%, 1632px)
+   ========================================================================== */
+#menu-section {
+  width: 100%;
+  height: var(--menu-height);
+  position: relative;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+.menu-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+.menu-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #f8fafc;
+  color: #334155;
+  text-align: center;
+  padding: 40px;
+}
+
+/* ==========================================================================
+   隱藏式除錯/測試面板 (按 'T' 鍵或雙擊頂部切換)
+   ========================================================================== */
+#debug-panel {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 14px;
+  z-index: 999;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  min-width: 260px;
+  backdrop-filter: blur(10px);
+}
+
+#debug-panel.visible {
+  display: flex;
+}
+
+.debug-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--guiji-yellow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.debug-close {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.debug-input-group {
+  display: flex;
+  gap: 6px;
+}
+
+.debug-input {
+  flex: 1;
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+}
+
+.debug-btn {
+  background: var(--guiji-yellow);
+  color: #000;
+  border: none;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.debug-btn-secondary {
+  background: #334155;
+  color: #fff;
+}
+
+.debug-btn-danger {
+  background: #ef4444;
+  color: #fff;
+}
+
+.debug-quick-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.quick-tag-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* 掃描狀態浮動提示 */
+.scan-toast {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(50px);
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid var(--guiji-yellow);
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 16px;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+  z-index: 100;
+}
+
+.scan-toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
