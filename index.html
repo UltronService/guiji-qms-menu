@@ -598,6 +598,7 @@
         const banner = document.getElementById('qms-banner');
         if (currentMain === "---" && banner.classList.contains('standby-mode')) {
             // 從待機模式甦醒：先移動 Logo，再點亮號碼
+            document.getElementById('main-number').textContent = '';
             banner.classList.remove('standby-mode');
             setTimeout(() => {
                 currentMain = scannedNumber;
