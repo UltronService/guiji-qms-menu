@@ -3,6 +3,34 @@
    視覺主題：龜記草本綠極簡橫向單列風格 (Guiji Herbal Green Minimalist Banner)
    ========================================================================== */
 
+@font-face {
+  font-family: 'Greycliff CF';
+  src: url('../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Greycliff CF';
+  src: url('../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Greycliff CF';
+  src: url('../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-extrabold.otf') format('opentype');
+  font-weight: 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Greycliff CF';
+  src: url('../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-heavy.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+}
+
 :root {
   --screen-width: 1080px;
   --screen-height: 1920px;
@@ -22,7 +50,7 @@
   
   /* 字體族系 */
   --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
-  --font-number: "Arial", -apple-system, "SF Pro Display", "Impact", sans-serif;
+  --font-number: "Greycliff CF", serif;
 }
 
 * {

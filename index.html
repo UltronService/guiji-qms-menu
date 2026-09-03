@@ -5,9 +5,38 @@
     <!-- 鎖定 Viewport，禁止縮放 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>龜記叫號取餐系統與電子菜單看板</title>
+    <!-- 引入開源免費字體作為選項 (供 Android 系統使用) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Nunito:wght@700;800;900&family=Poppins:wght@700;800;900&display=swap" rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'Greycliff CF';
+            src: url('assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-regular.otf') format('opentype');
+            font-weight: 400;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Greycliff CF';
+            src: url('assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-bold.otf') format('opentype');
+            font-weight: 700;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Greycliff CF';
+            src: url('assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-extrabold.otf') format('opentype');
+            font-weight: 800;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Greycliff CF';
+            src: url('assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-heavy.otf') format('opentype');
+            font-weight: 900;
+            font-style: normal;
+        }
         /* 動畫參數變數 (由設定面板控制) */
         :root {
+            --selected-font: 'Montserrat', sans-serif;
+            --banner-opacity: 0.8;
+            
             --hist1-dur: 0.5s;
             --hist1-ease: ease-out;
             --hist1-x: 0px;
@@ -52,10 +81,24 @@
             left: 0;
             width: 1080px;
             height: 288px;
-            background-color: #485b28; /* 龜記品牌草本橄欖綠 (影片載入前或 fallback) */
+            background-color: #000; /* 最底層為黑色，避免透明時漏光 */
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             z-index: 10;
             overflow: hidden;
+        }
+        
+        /* 半透明綠色遮罩層 (覆蓋在影片上方) */
+        #qms-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(72, 91, 40, var(--banner-opacity));
+            z-index: 2;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
         }
 
         /* 橫幅背景影片 */
@@ -68,9 +111,14 @@
             object-fit: cover;
             z-index: 1;
             pointer-events: none;
+            opacity: 1; /* 影片保持可見 */
         }
 
-        /* 待機模式 - 主號與歷史區隱藏 */
+        /* 待機模式 - 綠色遮罩隱藏，完全顯示影片，主號與歷史區隱藏 */
+        #qms-banner.standby-mode::before {
+            opacity: 0;
+        }
+
         .standby-mode .main-number-area,
         .standby-mode .history-area {
             opacity: 0 !important;
@@ -116,6 +164,7 @@
             z-index: 20;
         }
         #main-number {
+            font-family: var(--selected-font);
             color: #dbee0f; /* 亮黃/檸檬黃 */
             font-size: 148px;
             font-weight: 900;
@@ -158,6 +207,7 @@
             z-index: 20;
         }
         .history-item {
+            font-family: var(--selected-font);
             color: #fff; /* 白色 */
             font-size: 80px;
             font-weight: bold;
@@ -208,6 +258,55 @@
         .history-item.item-exit.item-exit-active {
             opacity: 0;
             transform: translateX(120px);
+        }
+
+        /* 直向排版模式 (Index 1 在上、Index 0 在下) */
+        .history-area.layout-vertical {
+            flex-direction: column-reverse;
+            justify-content: flex-start;
+            align-items: flex-end;
+            padding-bottom: 58px;
+            gap: 8px;
+        }
+        .history-area.layout-vertical .history-item {
+            font-size: 68px;
+            line-height: 1;
+            margin-right: 0;
+            padding: 2px 10px;
+        }
+        /* 直向 1. 新號碼進場 (Index 0)：由下方滑入 + 淡入 */
+        .history-area.layout-vertical .history-item.item-enter {
+            transform: translateY(40px);
+            opacity: 0;
+            transition: transform var(--hist1-dur) var(--hist1-ease),
+                        opacity var(--hist1-dur) var(--hist1-ease);
+        }
+        .history-area.layout-vertical .history-item.item-enter.item-enter-active {
+            transform: translateY(0);
+            opacity: 0.8;
+        }
+        /* 直向 2. 舊號碼向上推移 (Index 0 -> Index 1)：由下往上平順推移 */
+        .history-area.layout-vertical .history-item.item-shift {
+            transform: translateY(calc(100% + 8px));
+            transition: transform var(--hist2-dur) var(--hist2-ease);
+        }
+        .history-area.layout-vertical .history-item.item-shift.item-shift-active {
+            transform: translateY(0);
+        }
+        /* 直向 3. 最舊號碼向上滑出淡出 (Index 1 退場) */
+        .history-area.layout-vertical .history-item.item-exit {
+            position: absolute;
+            right: 0;
+            bottom: auto;
+            opacity: 0.8;
+            transform: translateY(0);
+            transition: transform calc(var(--hist1-dur) * 0.6) var(--hist1-ease),
+                        opacity calc(var(--hist1-dur) * 0.5) var(--hist1-ease);
+            pointer-events: none;
+        }
+        .history-area.layout-vertical .history-item.item-exit.item-exit-active {
+            opacity: 0;
+            transform: translateY(-40px);
         }
 
         /* 下方固定 85% (1632px) - 電子菜單 */
@@ -340,8 +439,38 @@
             <span style="font-size: 16px; color: #888;">按 T 關閉</span>
         </div>
 
-        <!-- 快速測試區 -->
+        <!-- 快速測試區與字體設定 -->
         <div style="background: rgba(255,255,255,0.08); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+            <!-- 字體選擇 -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px;">
+                <span style="font-size: 18px; color: #fff; font-weight: bold;">🔤 數字字體：</span>
+                <select id="font-selector" onchange="changeFont()" style="font-size: 18px; padding: 6px; background: #333; color: #fff; border: 1px solid #666; border-radius: 4px; flex-grow: 1; margin-left: 10px;">
+                    <option value="'Greycliff CF', sans-serif">Greycliff CF (有浮水印)</option>
+                    <option value="'Montserrat', sans-serif" selected>Montserrat (開源免費)</option>
+                    <option value="'Poppins', sans-serif">Poppins (開源免費)</option>
+                    <option value="'Nunito', sans-serif">Nunito (開源圓潤)</option>
+                    <option value="Arial, sans-serif">系統預設 (Arial)</option>
+                </select>
+            </div>
+            
+            <!-- 歷史號碼排版方式 -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px;">
+                <span style="font-size: 18px; color: #fff; font-weight: bold;">📑 歷史號碼排版：</span>
+                <select id="layout-selector" onchange="changeLayout(this.value)" style="font-size: 18px; padding: 6px; background: #333; color: #fff; border: 1px solid #666; border-radius: 4px; flex-grow: 1; margin-left: 10px;">
+                    <option value="horizontal" selected>橫向 (左新 右舊)</option>
+                    <option value="vertical">直向 (下新 上舊)</option>
+                </select>
+            </div>
+            
+            <!-- 綠底透明度設定 -->
+            <div style="margin-bottom: 15px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px;">
+                <div style="display: flex; justify-content: space-between; font-size: 18px; color: #fff; margin-bottom: 4px;">
+                    <span style="font-weight: bold;">🟩 綠底透明度：</span>
+                    <b id="opacity-val" style="color:#dbee0f; font-size: 20px;">0.80</b>
+                </div>
+                <input type="range" id="banner-opacity-slider" min="0" max="1" step="0.05" value="0.8" oninput="changeBannerOpacity()" style="width: 100%;">
+            </div>
+            
             <div style="display: flex; gap: 8px; margin-bottom: 10px;">
                 <button onclick="testNextNumber()" style="flex: 2; background: #dbee0f; color: #000; font-size: 24px; font-weight: bold; padding: 10px; border-radius: 6px;">
                     ▶ 立即測試 (下一號)
@@ -453,6 +582,49 @@
 
 <script>
     /* ==========================================================================
+       動態字體切換邏輯
+       ========================================================================== */
+    function changeFont() {
+        const fontSelector = document.getElementById('font-selector');
+        const selectedFont = fontSelector.value;
+        
+        // 更新根元素的 CSS 變數
+        document.documentElement.style.setProperty('--selected-font', selectedFont);
+        
+        // 將字體偏好儲存到 localStorage
+        localStorage.setItem('guiji_font_pref', selectedFont);
+    }
+    function changeBannerOpacity() {
+        const slider = document.getElementById('banner-opacity-slider');
+        const val = parseFloat(slider.value).toFixed(2);
+        
+        // 更新顯示文字
+        document.getElementById('opacity-val').textContent = val;
+        
+        // 更新根元素的 CSS 變數
+        document.documentElement.style.setProperty('--banner-opacity', val);
+        
+        // 將透明度偏好儲存到 localStorage
+        localStorage.setItem('guiji_banner_opacity', val);
+    }
+
+    // 頁面載入時套用儲存的字體與透明度偏好
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedFont = localStorage.getItem('guiji_font_pref');
+        if (savedFont) {
+            const fontSelector = document.getElementById('font-selector');
+            fontSelector.value = savedFont;
+            changeFont();
+        }
+        
+        const savedOpacity = localStorage.getItem('guiji_banner_opacity');
+        if (savedOpacity) {
+            const opacitySlider = document.getElementById('banner-opacity-slider');
+            opacitySlider.value = savedOpacity;
+            changeBannerOpacity();
+        }
+    });
+    /* ==========================================================================
        1. 自適應縮放邏輯
        ========================================================================== */
     function resizeViewport() {
@@ -466,15 +638,54 @@
     resizeViewport(); // 初始化
 
     /* ==========================================================================
-       2. 狀態與儲存邏輯 (1主 + 3歷史)
+       2. 狀態與儲存邏輯 (1主 + 2歷史，支援橫向/直向排版)
        ========================================================================== */
     let currentMain = "---";
     let historyList = [];
     const MAX_HISTORY = 2;
+    let currentLayout = 'horizontal'; // 'horizontal' | 'vertical'
+
+    function updateVideoPlayback(isStandby) {
+        const bgVideo = document.getElementById('qms-video-bg');
+        if (!bgVideo) return;
+
+        // 不論是否為待機狀態，影片都持續播放
+        bgVideo.play().catch(() => {});
+    }
+
+    function applyLayoutClass() {
+        const historyArea = document.getElementById('history-area');
+        if (!historyArea) return;
+        if (currentLayout === 'vertical') {
+            historyArea.classList.add('layout-vertical');
+        } else {
+            historyArea.classList.remove('layout-vertical');
+        }
+    }
+
+    function changeLayout(layout) {
+        currentLayout = layout;
+        localStorage.setItem('guiji_history_layout', currentLayout);
+        const layoutSelector = document.getElementById('layout-selector');
+        if (layoutSelector) layoutSelector.value = currentLayout;
+        applyLayoutClass();
+        updateUI(false);
+    }
 
     function loadState() {
         const savedMain = localStorage.getItem('guiji_main_number');
         const savedHistory = localStorage.getItem('guiji_history');
+        const savedLayout = localStorage.getItem('guiji_history_layout');
+
+        if (savedLayout === 'vertical' || savedLayout === 'horizontal') {
+            currentLayout = savedLayout;
+        }
+        const layoutSelector = document.getElementById('layout-selector');
+        if (layoutSelector) {
+            layoutSelector.value = currentLayout;
+        }
+        applyLayoutClass();
+
         if (savedMain) currentMain = savedMain;
         if (savedHistory) {
             try { 
@@ -487,8 +698,10 @@
         
         if (currentMain === "---") {
             document.getElementById('qms-banner').classList.add('standby-mode');
+            updateVideoPlayback(true);
         } else {
             document.getElementById('qms-banner').classList.remove('standby-mode');
+            updateVideoPlayback(false);
         }
         
         updateUI(false);
@@ -497,6 +710,7 @@
     function saveState() {
         localStorage.setItem('guiji_main_number', currentMain);
         localStorage.setItem('guiji_history', JSON.stringify(historyList));
+        localStorage.setItem('guiji_history_layout', currentLayout);
     }
 
     /* ==========================================================================
@@ -623,6 +837,7 @@
             // 從待機模式甦醒：先移動 Logo，再點亮號碼
             document.getElementById('main-number').textContent = '';
             banner.classList.remove('standby-mode');
+            updateVideoPlayback(false);
             setTimeout(() => {
                 currentMain = scannedNumber;
                 saveState();
@@ -679,6 +894,10 @@
             currentNodes.forEach(node => {
                 if (!historyList.includes(node.textContent)) {
                     node.classList.add('item-exit');
+                    if (currentLayout === 'vertical') {
+                        node.style.top = node.offsetTop + 'px';
+                        node.style.right = '0px';
+                    }
                     void node.offsetWidth;
                     node.classList.add('item-exit-active');
                     setTimeout(() => {
@@ -862,6 +1081,7 @@
         historyList = [];
         saveState();
         document.getElementById('qms-banner').classList.add('standby-mode');
+        updateVideoPlayback(true);
         updateUI(false);
     }
 
