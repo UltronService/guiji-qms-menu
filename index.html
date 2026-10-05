@@ -309,6 +309,69 @@
             transform: translateY(-40px);
         }
 
+        /* 方案 A：六筆直列（小字階梯、簡化動畫） */
+        .history-area.mode-stack-a {
+            flex-direction: column-reverse;
+            justify-content: flex-start;
+            align-items: flex-end;
+            padding-bottom: 10px;
+            gap: 0;
+            max-width: 210px;
+        }
+        .history-area.mode-stack-a .history-item {
+            font-size: 44px;
+            margin-right: 0;
+            padding: 0 4px;
+            line-height: 1.05;
+        }
+        .history-area.mode-stack-a .history-item[data-hist-index="0"] { font-size: 50px; opacity: 0.92; }
+        .history-area.mode-stack-a .history-item[data-hist-index="1"] { font-size: 46px; }
+        .history-area.mode-stack-a .history-item[data-hist-index="2"] { font-size: 42px; }
+        .history-area.mode-stack-a .history-item[data-hist-index="3"] { font-size: 38px; opacity: 0.78; }
+        .history-area.mode-stack-a .history-item[data-hist-index="4"] { font-size: 34px; opacity: 0.72; }
+        .history-area.mode-stack-a .history-item[data-hist-index="5"] { font-size: 30px; opacity: 0.66; }
+
+        /* 方案 B：六格 2×3 網格 */
+        .history-area.mode-grid-b {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(68px, auto));
+            grid-template-rows: repeat(3, auto);
+            align-content: end;
+            justify-content: end;
+            padding-bottom: 18px;
+            gap: 2px 14px;
+            width: auto;
+            max-width: 240px;
+        }
+        .history-area.mode-grid-b .history-item {
+            font-size: 40px;
+            margin-right: 0;
+            padding: 0 4px;
+            justify-self: end;
+        }
+        .history-area.mode-grid-b .history-item[data-hist-index="0"],
+        .history-area.mode-grid-b .history-item[data-hist-index="1"] {
+            font-size: 44px;
+            opacity: 0.9;
+        }
+        .history-area.mode-grid-b .history-item.item-fade-enter {
+            transform: none;
+            opacity: 0;
+            transition: opacity var(--hist1-dur) var(--hist1-ease);
+        }
+        .history-area.mode-grid-b .history-item.item-fade-enter.item-enter-active {
+            opacity: 0.85;
+        }
+        .history-area.mode-grid-b .history-item.item-exit {
+            position: relative;
+            right: auto;
+            bottom: auto;
+        }
+        .history-area.mode-grid-b .history-item.item-exit.item-exit-active {
+            opacity: 0;
+            transform: none;
+        }
+
         /* 下方固定 85% (1632px) - 電子菜單 */
         #menu-area {
             position: absolute;
@@ -453,8 +516,23 @@
                 </select>
             </div>
             
-            <!-- 歷史號碼排版方式 -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px;">
+            <!-- 歷史顯示模式（經典 / 方案 A / 方案 B） -->
+            <div style="margin-bottom: 15px; background: rgba(72, 91, 40, 0.35); padding: 10px; border-radius: 6px; border: 1px solid #485b28;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 18px; color: #dbee0f; font-weight: bold;">📺 歷史顯示模式：</span>
+                    <select id="display-mode-selector" onchange="changeDisplayMode(this.value)" style="font-size: 17px; padding: 6px; background: #333; color: #fff; border: 1px solid #666; border-radius: 4px; flex-grow: 1; margin-left: 10px; max-width: 280px;">
+                        <option value="classic" selected>經典（1 主 + 2 歷史 · 原版）</option>
+                        <option value="stack-a">方案 A · 六筆直列</option>
+                        <option value="grid-b">方案 B · 六格網格</option>
+                    </select>
+                </div>
+                <div style="font-size: 13px; color: #aaa; line-height: 1.4;">
+                    預設為經典。URL 預覽：<code style="color:#ccc;">?mode=classic</code> · <code style="color:#ccc;">?mode=a</code> · <code style="color:#ccc;">?mode=b</code>
+                </div>
+            </div>
+
+            <!-- 歷史號碼排版方式（僅經典模式） -->
+            <div id="layout-selector-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px;">
                 <span style="font-size: 18px; color: #fff; font-weight: bold;">📑 歷史號碼排版：</span>
                 <select id="layout-selector" onchange="changeLayout(this.value)" style="font-size: 18px; padding: 6px; background: #333; color: #fff; border: 1px solid #666; border-radius: 4px; flex-grow: 1; margin-left: 10px;">
                     <option value="horizontal" selected>橫向 (左新 右舊)</option>
@@ -638,12 +716,111 @@
     resizeViewport(); // 初始化
 
     /* ==========================================================================
-       2. 狀態與儲存邏輯 (1主 + 2歷史，支援橫向/直向排版)
+       2. 狀態與儲存邏輯 (經典 1+2 / 延伸 1+6，支援橫向/直向排版)
        ========================================================================== */
     let currentMain = "---";
     let historyList = [];
-    const MAX_HISTORY = 2;
+    /** @type {'classic' | 'stack-a' | 'grid-b'} */
+    let displayMode = 'classic';
     let currentLayout = 'horizontal'; // 'horizontal' | 'vertical'
+
+    function getMaxHistory() {
+        return displayMode === 'classic' ? 2 : 6;
+    }
+
+    function trimHistoryToMax() {
+        while (historyList.length > getMaxHistory()) {
+            historyList.pop();
+        }
+    }
+
+    const DISPLAY_MODE_URL_MAP = {
+        classic: 'classic',
+        a: 'stack-a',
+        'stack-a': 'stack-a',
+        b: 'grid-b',
+        'grid-b': 'grid-b'
+    };
+
+    function initDisplayMode() {
+        const params = new URLSearchParams(window.location.search);
+        const urlMode = params.get('mode');
+        if (urlMode) {
+            const mapped = DISPLAY_MODE_URL_MAP[urlMode.toLowerCase()];
+            if (mapped) {
+                displayMode = mapped;
+                localStorage.setItem('guiji_history_display_mode', displayMode);
+            }
+        } else {
+            const saved = localStorage.getItem('guiji_history_display_mode');
+            if (saved === 'classic' || saved === 'stack-a' || saved === 'grid-b') {
+                displayMode = saved;
+            }
+        }
+        const modeSelector = document.getElementById('display-mode-selector');
+        if (modeSelector) {
+            modeSelector.value = displayMode;
+        }
+        applyHistoryChrome();
+    }
+
+    function syncLayoutSelectorUI() {
+        const layoutSelector = document.getElementById('layout-selector');
+        const layoutRow = document.getElementById('layout-selector-row');
+        const isClassic = displayMode === 'classic';
+        if (layoutSelector) {
+            layoutSelector.disabled = !isClassic;
+        }
+        if (layoutRow) {
+            layoutRow.style.opacity = isClassic ? '1' : '0.45';
+        }
+    }
+
+    function applyHistoryChrome() {
+        const historyArea = document.getElementById('history-area');
+        if (!historyArea) return;
+
+        historyArea.classList.remove('mode-classic', 'mode-stack-a', 'mode-grid-b', 'layout-vertical');
+
+        if (displayMode === 'classic') {
+            historyArea.classList.add('mode-classic');
+            applyLayoutClass();
+        } else if (displayMode === 'stack-a') {
+            historyArea.classList.add('mode-stack-a', 'layout-vertical');
+        } else {
+            historyArea.classList.add('mode-grid-b');
+        }
+        syncLayoutSelectorUI();
+    }
+
+    function changeDisplayMode(mode) {
+        if (mode !== 'classic' && mode !== 'stack-a' && mode !== 'grid-b') {
+            return;
+        }
+        displayMode = mode;
+        localStorage.setItem('guiji_history_display_mode', displayMode);
+        const modeSelector = document.getElementById('display-mode-selector');
+        if (modeSelector) {
+            modeSelector.value = displayMode;
+        }
+        trimHistoryToMax();
+        applyHistoryChrome();
+        saveState();
+        updateUI(false);
+    }
+
+    function applyHistoryItemMeta(el, index, useGrid) {
+        el.setAttribute('data-hist-index', String(index));
+        if (useGrid) {
+            const row = 3 - Math.floor(index / 2);
+            const col = index % 2 === 0 ? 2 : 1;
+            el.style.gridRow = String(row);
+            el.style.gridColumn = String(col);
+            return;
+        }
+        el.style.gridRow = '';
+        el.style.gridColumn = '';
+    }
 
     function updateVideoPlayback(isStandby) {
         const bgVideo = document.getElementById('qms-video-bg');
@@ -655,7 +832,7 @@
 
     function applyLayoutClass() {
         const historyArea = document.getElementById('history-area');
-        if (!historyArea) return;
+        if (!historyArea || displayMode !== 'classic') return;
         if (currentLayout === 'vertical') {
             historyArea.classList.add('layout-vertical');
         } else {
@@ -673,6 +850,8 @@
     }
 
     function loadState() {
+        initDisplayMode();
+
         const savedMain = localStorage.getItem('guiji_main_number');
         const savedHistory = localStorage.getItem('guiji_history');
         const savedLayout = localStorage.getItem('guiji_history_layout');
@@ -684,15 +863,13 @@
         if (layoutSelector) {
             layoutSelector.value = currentLayout;
         }
-        applyLayoutClass();
+        applyHistoryChrome();
 
         if (savedMain) currentMain = savedMain;
         if (savedHistory) {
             try { 
                 historyList = JSON.parse(savedHistory); 
-                while (historyList.length > MAX_HISTORY) {
-                    historyList.pop();
-                }
+                trimHistoryToMax();
             } catch(e) {}
         }
         
@@ -711,6 +888,7 @@
         localStorage.setItem('guiji_main_number', currentMain);
         localStorage.setItem('guiji_history', JSON.stringify(historyList));
         localStorage.setItem('guiji_history_layout', currentLayout);
+        localStorage.setItem('guiji_history_display_mode', displayMode);
     }
 
     /* ==========================================================================
@@ -862,9 +1040,7 @@
 
         if (currentMain !== "---") {
             historyList.unshift(currentMain); // 推入最前面
-            while (historyList.length > MAX_HISTORY) {
-                historyList.pop(); // 超過數量則移除最舊
-            }
+            trimHistoryToMax();
         }
         
         currentMain = scannedNumber;
@@ -872,25 +1048,13 @@
         updateUI(true);
     }
 
-    function updateUI(withEffects) {
-        // 更新主號碼
-        const mainEl = document.getElementById('main-number');
-        mainEl.textContent = currentMain;
-        
-        // 自適應字級調整 (超過 4 碼縮小)
-        if (currentMain.length > 4) {
-            mainEl.style.fontSize = Math.max(80, 148 - (currentMain.length - 4) * 15) + 'px';
-        } else {
-            mainEl.style.fontSize = '148px';
-        }
-
-        // 更新歷史紀錄 (方案 A：純 GPU Transform 位移滑動)
+    function updateHistoryClassic(withEffects) {
         const historyArea = document.getElementById('history-area');
-        
+        if (!historyArea) return;
+
         if (withEffects) {
             const currentNodes = Array.from(historyArea.querySelectorAll('.history-item:not(.item-exit)'));
-            
-            // 1. 標記並觸發退場節點 (超過 MAX_HISTORY 或被擠出的號碼)
+
             currentNodes.forEach(node => {
                 if (!historyList.includes(node.textContent)) {
                     node.classList.add('item-exit');
@@ -906,26 +1070,23 @@
                 }
             });
 
-            // 2. 處理進場與推移節點
             historyList.forEach((num, index) => {
                 let el = currentNodes.find(n => n.textContent === num && !n.classList.contains('item-exit'));
                 const activeNodes = Array.from(historyArea.querySelectorAll('.history-item:not(.item-exit)'));
                 const refNode = activeNodes[index] || null;
 
                 if (!el) {
-                    // 全新加入的歷史號碼 (index 0)：由左側滑入 + 淡入
                     el = document.createElement('div');
                     el.className = 'history-item item-enter';
                     el.textContent = num;
                     historyArea.insertBefore(el, refNode);
                     void el.offsetWidth;
                     el.classList.add('item-enter-active');
-                    
+
                     setTimeout(() => {
                         el.classList.remove('item-enter', 'item-enter-active');
                     }, animConfig.h1Dur * 1000 + 50);
                 } else {
-                    // 已存在的號碼 (由 index 0 被推移到 index 1)：從原位置向右滑動
                     historyArea.insertBefore(el, refNode);
                     el.classList.remove('item-shift', 'item-shift-active');
                     el.classList.add('item-shift');
@@ -934,26 +1095,104 @@
                         el.style.transitionDelay = animConfig.h2Delay + 's';
                     }
                     el.classList.add('item-shift-active');
-                    
+
                     setTimeout(() => {
                         el.classList.remove('item-shift', 'item-shift-active');
                         el.style.transitionDelay = '';
                     }, (animConfig.h2Dur + animConfig.h2Delay) * 1000 + 50);
                 }
             });
-            
-            if (currentMain !== "---") {
-                triggerEffects(currentMain);
-            }
-        } else {
-            // 無特效時（如初次載入），直接全量更新
+            return;
+        }
+
+        historyArea.innerHTML = '';
+        historyList.forEach(num => {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.textContent = num;
+            historyArea.appendChild(div);
+        });
+    }
+
+    function updateHistoryExtended(withEffects, useGrid) {
+        const historyArea = document.getElementById('history-area');
+        if (!historyArea) return;
+
+        if (!withEffects) {
             historyArea.innerHTML = '';
-            historyList.forEach(num => {
+            historyList.forEach((num, index) => {
                 const div = document.createElement('div');
                 div.className = 'history-item';
                 div.textContent = num;
+                applyHistoryItemMeta(div, index, useGrid);
                 historyArea.appendChild(div);
             });
+            return;
+        }
+
+        const currentNodes = Array.from(historyArea.querySelectorAll('.history-item:not(.item-exit)'));
+
+        currentNodes.forEach(node => {
+            if (!historyList.includes(node.textContent)) {
+                node.classList.add('item-exit');
+                if (!useGrid && displayMode === 'stack-a') {
+                    node.style.top = node.offsetTop + 'px';
+                    node.style.right = '0px';
+                }
+                void node.offsetWidth;
+                node.classList.add('item-exit-active');
+                setTimeout(() => {
+                    if (node.parentNode) node.parentNode.removeChild(node);
+                }, animConfig.h1Dur * 1000 + 50);
+            }
+        });
+
+        historyList.forEach((num, index) => {
+            const activeNodes = Array.from(historyArea.querySelectorAll('.history-item:not(.item-exit)'));
+            let el = activeNodes.find(n => n.textContent === num);
+            const refNode = activeNodes[index] || null;
+
+            if (!el) {
+                el = document.createElement('div');
+                el.className = 'history-item item-enter';
+                if (useGrid) {
+                    el.classList.add('item-fade-enter');
+                }
+                el.textContent = num;
+                applyHistoryItemMeta(el, index, useGrid);
+                historyArea.insertBefore(el, refNode);
+                void el.offsetWidth;
+                el.classList.add('item-enter-active');
+                setTimeout(() => {
+                    el.classList.remove('item-enter', 'item-enter-active', 'item-fade-enter');
+                }, animConfig.h1Dur * 1000 + 50);
+            } else {
+                applyHistoryItemMeta(el, index, useGrid);
+                historyArea.insertBefore(el, refNode);
+            }
+        });
+    }
+
+    function updateUI(withEffects) {
+        const mainEl = document.getElementById('main-number');
+        mainEl.textContent = currentMain;
+
+        if (currentMain.length > 4) {
+            mainEl.style.fontSize = Math.max(80, 148 - (currentMain.length - 4) * 15) + 'px';
+        } else {
+            mainEl.style.fontSize = '148px';
+        }
+
+        if (displayMode === 'classic') {
+            updateHistoryClassic(withEffects);
+        } else if (displayMode === 'stack-a') {
+            updateHistoryExtended(withEffects, false);
+        } else {
+            updateHistoryExtended(withEffects, true);
+        }
+
+        if (withEffects && currentMain !== "---") {
+            triggerEffects(currentMain);
         }
     }
 
