@@ -375,42 +375,23 @@
             width: auto;
             height: 100%;
             align-content: end;
-            padding-bottom: 22px;
+            padding-bottom: 75px;
         }
         .history-area.mode-grid-b {
             display: grid;
-            grid-template-columns: repeat(3, minmax(72px, 1fr));
+            grid-template-columns: repeat(3, minmax(64px, 1fr));
             grid-template-rows: repeat(2, auto);
-            gap: 6px 12px;
+            gap: 4px 10px;
             justify-items: center;
             align-items: end;
         }
         .history-area.mode-grid-b .history-item {
-            font-size: 36px;
+            font-size: 72px;
+            font-weight: bold;
             margin-right: 0;
-            padding: 0 6px;
+            padding: 0 14px;
+            opacity: 0.8;
             justify-self: center;
-        }
-        .history-area.mode-grid-b .history-item[data-hist-index="0"] {
-            font-size: 42px;
-            opacity: 0.95;
-        }
-        .history-area.mode-grid-b .history-item.item-fade-enter {
-            transform: none;
-            opacity: 0;
-            transition: opacity var(--hist1-dur) var(--hist1-ease);
-        }
-        .history-area.mode-grid-b .history-item.item-fade-enter.item-enter-active {
-            opacity: 0.85;
-        }
-        .history-area.mode-grid-b .history-item.item-exit {
-            position: relative;
-            right: auto;
-            bottom: auto;
-        }
-        .history-area.mode-grid-b .history-item.item-exit.item-exit-active {
-            opacity: 0;
-            transform: none;
         }
 
         /* 下方固定 85% (1632px) - 電子菜單 */
@@ -1241,6 +1222,71 @@
         });
     }
 
+    function updateHistoryGridB(withEffects) {
+        const historyArea = document.getElementById('history-area');
+        if (!historyArea) return;
+
+        if (!withEffects) {
+            historyArea.innerHTML = '';
+            historyList.forEach((num, index) => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.textContent = num;
+                applyHistoryItemMeta(div, index, true);
+                historyArea.appendChild(div);
+            });
+            return;
+        }
+
+        const currentNodes = Array.from(historyArea.querySelectorAll('.history-item:not(.item-exit)'));
+
+        currentNodes.forEach(node => {
+            if (!historyList.includes(node.textContent)) {
+                node.classList.add('item-exit');
+                void node.offsetWidth;
+                node.classList.add('item-exit-active');
+                setTimeout(() => {
+                    if (node.parentNode) node.parentNode.removeChild(node);
+                }, animConfig.h1Dur * 1000 + 50);
+            }
+        });
+
+        historyList.forEach((num, index) => {
+            let el = currentNodes.find(n => n.textContent === num && !n.classList.contains('item-exit'));
+            const activeNodes = Array.from(historyArea.querySelectorAll('.history-item:not(.item-exit)'));
+            const refNode = activeNodes[index] || null;
+
+            if (!el) {
+                el = document.createElement('div');
+                el.className = 'history-item item-enter';
+                el.textContent = num;
+                applyHistoryItemMeta(el, index, true);
+                historyArea.insertBefore(el, refNode);
+                void el.offsetWidth;
+                el.classList.add('item-enter-active');
+
+                setTimeout(() => {
+                    el.classList.remove('item-enter', 'item-enter-active');
+                }, animConfig.h1Dur * 1000 + 50);
+            } else {
+                applyHistoryItemMeta(el, index, true);
+                historyArea.insertBefore(el, refNode);
+                el.classList.remove('item-shift', 'item-shift-active');
+                el.classList.add('item-shift');
+                void el.offsetWidth;
+                if (animConfig.h2Delay > 0) {
+                    el.style.transitionDelay = animConfig.h2Delay + 's';
+                }
+                el.classList.add('item-shift-active');
+
+                setTimeout(() => {
+                    el.classList.remove('item-shift', 'item-shift-active');
+                    el.style.transitionDelay = '';
+                }, (animConfig.h2Dur + animConfig.h2Delay) * 1000 + 50);
+            }
+        });
+    }
+
     function updateHistoryExtended(withEffects, useGrid) {
         const historyArea = document.getElementById('history-area');
         if (!historyArea) return;
@@ -1321,7 +1367,7 @@
         } else if (displayMode === 'stack-a') {
             updateHistoryExtended(withEffects, false);
         } else {
-            updateHistoryExtended(withEffects, true);
+            updateHistoryGridB(withEffects);
         }
 
         syncGridBBannerState();
