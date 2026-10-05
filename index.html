@@ -331,28 +331,69 @@
         .history-area.mode-stack-a .history-item[data-hist-index="4"] { font-size: 34px; opacity: 0.72; }
         .history-area.mode-stack-a .history-item[data-hist-index="5"] { font-size: 30px; opacity: 0.66; }
 
-        /* 方案 B：六格 2×3 網格 */
+        /* 方案 B：六格 3×2 網格（上三下三）+ 單號 / 多號橫幅狀態 */
+        .main-number-area {
+            transition: left 0.5s cubic-bezier(0.25, 1, 0.5, 1),
+                        transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        #qms-banner.banner-grid-b.grid-b-solo:not(.standby-mode) .main-number-area {
+            left: 50%;
+            transform: translateX(-50%);
+            justify-content: center;
+            width: auto;
+        }
+        #qms-banner.banner-grid-b.grid-b-active .logo-area {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateY(-50%) scale(0.65);
+            transition: opacity 0.45s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.45s;
+        }
+        #qms-banner.banner-grid-b.grid-b-solo:not(.standby-mode) .logo-area {
+            opacity: 1;
+            visibility: visible;
+        }
+        #qms-banner.banner-grid-b.grid-b-active .main-number-area {
+            left: 36px;
+            transform: translateX(0);
+            justify-content: flex-start;
+            width: 248px;
+            padding-bottom: 62px;
+        }
+        #qms-banner.banner-grid-b.grid-b-active #main-number {
+            font-size: 112px;
+            letter-spacing: 3px;
+        }
+        #qms-banner.banner-grid-b.grid-b-solo:not(.standby-mode) .history-area.mode-grid-b {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #qms-banner.banner-grid-b.grid-b-active .history-area.mode-grid-b {
+            opacity: 1;
+            left: 292px;
+            right: 32px;
+            width: auto;
+            height: 100%;
+            align-content: end;
+            padding-bottom: 22px;
+        }
         .history-area.mode-grid-b {
             display: grid;
-            grid-template-columns: repeat(2, minmax(68px, auto));
-            grid-template-rows: repeat(3, auto);
-            align-content: end;
-            justify-content: end;
-            padding-bottom: 18px;
-            gap: 2px 14px;
-            width: auto;
-            max-width: 240px;
+            grid-template-columns: repeat(3, minmax(72px, 1fr));
+            grid-template-rows: repeat(2, auto);
+            gap: 6px 12px;
+            justify-items: center;
+            align-items: end;
         }
         .history-area.mode-grid-b .history-item {
-            font-size: 40px;
+            font-size: 36px;
             margin-right: 0;
-            padding: 0 4px;
-            justify-self: end;
+            padding: 0 6px;
+            justify-self: center;
         }
-        .history-area.mode-grid-b .history-item[data-hist-index="0"],
-        .history-area.mode-grid-b .history-item[data-hist-index="1"] {
-            font-size: 44px;
-            opacity: 0.9;
+        .history-area.mode-grid-b .history-item[data-hist-index="0"] {
+            font-size: 42px;
+            opacity: 0.95;
         }
         .history-area.mode-grid-b .history-item.item-fade-enter {
             transform: none;
@@ -539,6 +580,17 @@
                     <option value="vertical">直向 (下新 上舊)</option>
                 </select>
             </div>
+
+            <!-- 方案 B · 六格排版（B1–B4，供業主試看） -->
+            <div id="grid-b-layout-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px;">
+                <span style="font-size: 18px; color: #fff; font-weight: bold;">⊞ 方案 B 六格排版：</span>
+                <select id="grid-b-layout-selector" onchange="changeGridBLayout(this.value)" style="font-size: 16px; padding: 6px; background: #333; color: #fff; border: 1px solid #666; border-radius: 4px; flex-grow: 1; margin-left: 10px;">
+                    <option value="b1" selected>B1 下排新（左→右）· 預設</option>
+                    <option value="b2">B2 上排舊 / 下排新</option>
+                    <option value="b3">B3 上→下、左→右填格</option>
+                    <option value="b4">B4 右上最新</option>
+                </select>
+            </div>
             
             <!-- 綠底透明度設定 -->
             <div style="margin-bottom: 15px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px;">
@@ -722,6 +774,8 @@
     let historyList = [];
     /** @type {'classic' | 'stack-a' | 'grid-b'} */
     let displayMode = 'classic';
+    /** @type {'b1' | 'b2' | 'b3' | 'b4'} */
+    let gridBLayout = 'b1';
     let currentLayout = 'horizontal'; // 'horizontal' | 'vertical'
 
     function getMaxHistory() {
@@ -757,9 +811,17 @@
                 displayMode = saved;
             }
         }
+        const savedGridB = localStorage.getItem('guiji_grid_b_layout');
+        if (savedGridB === 'b1' || savedGridB === 'b2' || savedGridB === 'b3' || savedGridB === 'b4') {
+            gridBLayout = savedGridB;
+        }
         const modeSelector = document.getElementById('display-mode-selector');
         if (modeSelector) {
             modeSelector.value = displayMode;
+        }
+        const gridBSelector = document.getElementById('grid-b-layout-selector');
+        if (gridBSelector) {
+            gridBSelector.value = gridBLayout;
         }
         applyHistoryChrome();
     }
@@ -767,12 +829,76 @@
     function syncLayoutSelectorUI() {
         const layoutSelector = document.getElementById('layout-selector');
         const layoutRow = document.getElementById('layout-selector-row');
+        const gridBSelector = document.getElementById('grid-b-layout-selector');
+        const gridBRow = document.getElementById('grid-b-layout-row');
         const isClassic = displayMode === 'classic';
+        const isGridB = displayMode === 'grid-b';
         if (layoutSelector) {
             layoutSelector.disabled = !isClassic;
         }
         if (layoutRow) {
             layoutRow.style.opacity = isClassic ? '1' : '0.45';
+        }
+        if (gridBSelector) {
+            gridBSelector.disabled = !isGridB;
+            gridBSelector.value = gridBLayout;
+        }
+        if (gridBRow) {
+            gridBRow.style.opacity = isGridB ? '1' : '0.45';
+        }
+    }
+
+    function syncGridBBannerState() {
+        const banner = document.getElementById('qms-banner');
+        if (!banner) return;
+
+        banner.classList.remove('banner-grid-b', 'grid-b-solo', 'grid-b-active');
+
+        if (displayMode !== 'grid-b' || banner.classList.contains('standby-mode')) {
+            return;
+        }
+
+        banner.classList.add('banner-grid-b');
+        if (historyList.length === 0) {
+            banner.classList.add('grid-b-solo');
+        } else {
+            banner.classList.add('grid-b-active');
+        }
+    }
+
+    function getGridBPlacement(index) {
+        const layout = gridBLayout;
+        if (layout === 'b3') {
+            if (index < 3) {
+                return { row: 1, col: index + 1 };
+            }
+            return { row: 2, col: index - 2 };
+        }
+        if (layout === 'b4') {
+            if (index < 3) {
+                return { row: 1, col: 3 - index };
+            }
+            return { row: 2, col: 3 - (index - 3) };
+        }
+        /* b1 / b2：下排最新三筆左→右，上排較舊三筆 */
+        if (index < 3) {
+            return { row: 2, col: index + 1 };
+        }
+        return { row: 1, col: index - 2 };
+    }
+
+    function changeGridBLayout(layout) {
+        if (layout !== 'b1' && layout !== 'b2' && layout !== 'b3' && layout !== 'b4') {
+            return;
+        }
+        gridBLayout = layout;
+        localStorage.setItem('guiji_grid_b_layout', gridBLayout);
+        const gridBSelector = document.getElementById('grid-b-layout-selector');
+        if (gridBSelector) {
+            gridBSelector.value = gridBLayout;
+        }
+        if (displayMode === 'grid-b') {
+            updateUI(false);
         }
     }
 
@@ -791,6 +917,7 @@
             historyArea.classList.add('mode-grid-b');
         }
         syncLayoutSelectorUI();
+        syncGridBBannerState();
     }
 
     function changeDisplayMode(mode) {
@@ -812,10 +939,9 @@
     function applyHistoryItemMeta(el, index, useGrid) {
         el.setAttribute('data-hist-index', String(index));
         if (useGrid) {
-            const row = 3 - Math.floor(index / 2);
-            const col = index % 2 === 0 ? 2 : 1;
-            el.style.gridRow = String(row);
-            el.style.gridColumn = String(col);
+            const place = getGridBPlacement(index);
+            el.style.gridRow = String(place.row);
+            el.style.gridColumn = String(place.col);
             return;
         }
         el.style.gridRow = '';
@@ -889,6 +1015,7 @@
         localStorage.setItem('guiji_history', JSON.stringify(historyList));
         localStorage.setItem('guiji_history_layout', currentLayout);
         localStorage.setItem('guiji_history_display_mode', displayMode);
+        localStorage.setItem('guiji_grid_b_layout', gridBLayout);
     }
 
     /* ==========================================================================
@@ -1177,7 +1304,13 @@
         const mainEl = document.getElementById('main-number');
         mainEl.textContent = currentMain;
 
-        if (currentMain.length > 4) {
+        if (displayMode === 'grid-b' && historyList.length > 0) {
+            if (currentMain.length > 4) {
+                mainEl.style.fontSize = Math.max(72, 112 - (currentMain.length - 4) * 12) + 'px';
+            } else {
+                mainEl.style.fontSize = '';
+            }
+        } else if (currentMain.length > 4) {
             mainEl.style.fontSize = Math.max(80, 148 - (currentMain.length - 4) * 15) + 'px';
         } else {
             mainEl.style.fontSize = '148px';
@@ -1190,6 +1323,8 @@
         } else {
             updateHistoryExtended(withEffects, true);
         }
+
+        syncGridBBannerState();
 
         if (withEffects && currentMain !== "---") {
             triggerEffects(currentMain);
