@@ -395,6 +395,21 @@
             justify-self: center;
         }
 
+        /* 方案 B 六格專用：方案 A 原地柔和淡出 + 縮小退場 (不脫離網格、不往外飛甩) */
+        .history-area.mode-grid-b .history-item.item-exit {
+            position: relative !important;
+            right: auto !important;
+            bottom: auto !important;
+            opacity: 0.8;
+            transform: scale(1);
+            transition: opacity 0.35s ease-out, transform 0.35s ease-out !important;
+            pointer-events: none;
+        }
+        .history-area.mode-grid-b .history-item.item-exit.item-exit-active {
+            opacity: 0 !important;
+            transform: scale(0.75) !important;
+        }
+
         /* 下方固定 85% (1632px) - 電子菜單 */
         #menu-area {
             position: absolute;
