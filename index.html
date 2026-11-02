@@ -16,10 +16,9 @@
 <div id="viewport-container">
     <!-- 上方 15% 叫號橫幅 -->
     <div id="qms-banner" ondblclick="toggleDebugPanel()">
-        <!-- 背景影片 (優先讀取本地離線影片，外部網址作為備援) -->
+        <!-- 背景影片 (本地離線影片，由 Service Worker 預先快取) -->
         <video id="qms-video-bg" autoplay loop muted playsinline>
             <source src="assets/maxhomevideo2.webm" type="video/webm">
-            <source src="https://goods-pics.haha.tw/guiji/maxhomevideo2.webm" type="video/webm">
         </video>
 
         <!-- 左側 Logo -->
