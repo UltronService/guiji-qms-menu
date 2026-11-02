@@ -1,368 +1,696 @@
 /* ==========================================================================
-   龜記 (Guiji) 1080x1920 9:16 直立式叫號機與電子菜單系統樣式
-   視覺主題：龜記草本綠極簡橫向單列風格 (Guiji Herbal Green Minimalist Banner)
+   龜記叫號取餐系統與電子菜單看板 (Guiji QMS & Menu Board)
+   畫布規格：1080x1920 (9:16 直立式滿版自適應縮放)
    ========================================================================== */
 
+/* 1. 字體定義 (@font-face) */
 @font-face {
-  font-family: 'Greycliff CF';
-  src: url('../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-regular.otf') format('opentype');
-  font-weight: 400;
-  font-style: normal;
+    font-family: 'Greycliff CF';
+    src: url('../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-regular.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Greycliff CF';
+    src: url('../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-bold.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Greycliff CF';
+    src: url('../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-extrabold.otf') format('opentype');
+    font-weight: 800;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Greycliff CF';
+    src: url('../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-heavy.otf') format('opentype');
+    font-weight: 900;
+    font-style: normal;
 }
 
-@font-face {
-  font-family: 'Greycliff CF';
-  src: url('../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-bold.otf') format('opentype');
-  font-weight: 700;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Greycliff CF';
-  src: url('../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-extrabold.otf') format('opentype');
-  font-weight: 800;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Greycliff CF';
-  src: url('../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-heavy.otf') format('opentype');
-  font-weight: 900;
-  font-style: normal;
-}
-
+/* 2. 全域 CSS 變數 (由動態調校面板即時控制) */
 :root {
-  --screen-width: 1080px;
-  --screen-height: 1920px;
-  --header-height: 288px; /* 上方 15% (288px) */
-  --menu-height: 1632px;   /* 下方 85% (1632px) */
-  
-  /* 龜記品牌色彩定義 */
-  --guiji-green: #485b28;       /* 龜記招牌草本橄欖綠 */
-  --guiji-green-dark: #3a4b1f;  /* 深綠陰影色 */
-  --guiji-yellow: #dbee0f;      /* 亮黃/檸檬黃主號碼 */
-  --guiji-yellow-glow: rgba(219, 238, 15, 0.4);
-  --history-color: #8ed6de;     /* 歷史號碼淺青白色 */
-  
-  /* 通用色彩 */
-  --text-white: #ffffff;
-  --text-muted: rgba(255, 255, 255, 0.6);
-  
-  /* 字體族系 */
-  --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
-  --font-number: "Greycliff CF", serif;
+    --selected-font: 'Montserrat', sans-serif;
+    --banner-opacity: 0.8;
+
+    --hist1-dur: 0.5s;
+    --hist1-ease: ease-out;
+    --hist1-x: 0px;
+
+    --hist2-dur: 0.5s;
+    --hist2-ease: ease-out;
+    --hist2-delay: 0s;
+    --hist2-x: 0px;
 }
 
+/* 3. 基礎重置與全域容器 */
 * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-touch-callout: none;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 html, body {
-  width: 100vw;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  background-color: #000000;
-  font-family: var(--font-family);
-  color: var(--text-white);
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    overflow: hidden;
+    font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-/* 1080x1920 鎖定畫布容器 (在 1080x1920 機上盒上為 1:1 滿版) */
-#app-container {
-  width: 1080px;
-  height: 1920px;
-  min-width: 1080px;
-  min-height: 1920px;
-  position: relative;
-  background: var(--guiji-green);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
-  transform-origin: top center;
+/* 自適應縮放容器 (鎖定 1080x1920) */
+#viewport-container {
+    width: 1080px;
+    height: 1920px;
+    position: relative;
+    transform-origin: center center;
+    background-color: #000;
 }
 
 /* ==========================================================================
-   頂部叫號區域 (上方固定 15%, 288px)
+   上方固定 15% (288px) - 即時叫號橫幅 (#qms-banner)
    ========================================================================== */
-#qms-section {
-  width: 100%;
-  height: var(--header-height);
-  background-color: var(--guiji-green);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 40px;
-  position: relative;
-  z-index: 10;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+#qms-banner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1080px;
+    height: 288px;
+    background-color: #000;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    overflow: hidden;
 }
 
-/* 頂部三欄橫向排版：左 Logo (28%) + 中主號碼 (42%) + 右歷史 (30%) */
-.qms-row {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+/* 半透明綠色遮罩層 (覆蓋在影片上方) */
+#qms-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(72, 91, 40, var(--banner-opacity));
+    z-index: 2;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
 }
 
-/* 1. 左側：龜記 Guiji 官方品牌標誌 */
-.brand-logo-area {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.guiji-official-logo {
-  height: 96px;
-  width: auto;
-  object-fit: contain;
-  display: block;
-}
-
-/* 2. 中間：最新主叫號碼 (巨幅亮黃色，居中高亮) */
-.main-number-area {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0 10px;
-}
-
-.main-call-number {
-  font-family: var(--font-number);
-  font-size: 148px;
-  font-weight: 900;
-  line-height: 1;
-  color: var(--guiji-yellow);
-  letter-spacing: 2px;
-  text-align: center;
-  white-space: nowrap;
-  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.main-call-number.waiting {
-  font-size: 64px;
-  color: rgba(255, 255, 255, 0.5);
-  font-weight: 700;
-  letter-spacing: 4px;
-}
-
-/* 新號碼進場動畫 */
-.main-call-number.calling {
-  animation: number-pulse-glow 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-@keyframes number-pulse-glow {
-  0% {
-    transform: scale(0.7);
-    opacity: 0.2;
-  }
-  60% {
-    transform: scale(1.18);
+/* 橫幅背景影片 */
+#qms-video-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    pointer-events: none;
     opacity: 1;
-    text-shadow: 0 0 35px var(--guiji-yellow-glow);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
 }
 
-/* 3. 右側：歷史號碼序列 (橫向平鋪) */
-.history-numbers-area {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 28px;
-  flex-shrink: 0;
-  min-width: 250px;
-}
-
-.history-num-item {
-  font-family: var(--font-number);
-  font-size: 62px;
-  font-weight: 800;
-  color: var(--history-color);
-  letter-spacing: 1px;
-  white-space: nowrap;
-  opacity: 0.95;
-  transition: all 0.3s ease;
-}
-
-.history-num-item.empty {
-  opacity: 0;
-}
-
-.history-num-item.newly-pushed {
-  animation: history-slide-in 0.4s ease-out;
-}
-
-@keyframes history-slide-in {
-  0% {
-    transform: translateX(-15px);
+/* 待機模式 - 綠色遮罩隱藏，完全顯示影片，主號與歷史區隱藏 */
+#qms-banner.standby-mode::before {
     opacity: 0;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 0.95;
-  }
+}
+
+.standby-mode .main-number-area,
+.standby-mode .history-area {
+    opacity: 0 !important;
+    pointer-events: none;
+}
+
+/* 左側 Logo 區 */
+.logo-area {
+    width: 200px;
+    height: 200px;
+    position: absolute;
+    top: 50%;
+    left: 40px;
+    transform: translateY(-50%) scale(1);
+    transform-origin: center center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: left 0.5s cubic-bezier(0.25, 1, 0.5, 1),
+                transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    z-index: 20;
+    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.4));
+}
+
+.standby-mode .logo-area {
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1.6);
+}
+
+.logo-area svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* 中間 主叫號區 */
+.main-number-area {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding-bottom: 75px;
+    opacity: 1;
+    z-index: 20;
+    transition: left 0.5s cubic-bezier(0.25, 1, 0.5, 1),
+                transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+#main-number {
+    font-family: var(--selected-font);
+    color: #dbee0f;
+    font-size: 148px;
+    font-weight: 900;
+    letter-spacing: 5px;
+    white-space: nowrap;
+    line-height: 1;
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+}
+
+/* 主號碼動畫：進場彈跳 */
+@keyframes popIn {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.animate-call {
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 /* ==========================================================================
-   下方菜單區域 (佔 85%, 1632px)
+   右側 歷史號碼區 (經典橫向 / 經典直向 / 方案 A 六筆直列 / 方案 B 六格網格)
    ========================================================================== */
-#menu-section {
-  width: 100%;
-  height: var(--menu-height);
-  position: relative;
-  background-color: #ffffff;
-  overflow: hidden;
+.history-area {
+    position: absolute;
+    right: 40px;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding-bottom: 75px;
+    opacity: 1;
+    z-index: 20;
 }
 
-.menu-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center top;
-  display: block;
+.history-item {
+    font-family: var(--selected-font);
+    color: #fff;
+    font-size: 80px;
+    font-weight: bold;
+    opacity: 0.8;
+    white-space: nowrap;
+    line-height: 1;
+    margin-right: 20px;
+    padding: 0 14px;
+    box-sizing: border-box;
+    will-change: transform, opacity;
+    text-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
 }
 
-.menu-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background: #f8fafc;
-  color: #334155;
-  text-align: center;
-  padding: 40px;
+/* 純 GPU Transform 位移滑動 (橫向預設) */
+/* 1. 新號碼進場：由左側滑入 + 淡入 */
+.history-item.item-enter {
+    transform: translateX(calc(-60px + var(--hist1-x)));
+    opacity: 0;
+    transition: transform var(--hist1-dur) var(--hist1-ease),
+                opacity var(--hist1-dur) var(--hist1-ease);
+}
+.history-item.item-enter.item-enter-active {
+    transform: translateX(0);
+    opacity: 0.8;
+}
+
+/* 2. 舊號碼同步向右推移 */
+.history-item.item-shift {
+    transform: translateX(calc(-100% - 20px + var(--hist2-x)));
+    transition: transform var(--hist2-dur) var(--hist2-ease);
+}
+.history-item.item-shift.item-shift-active {
+    transform: translateX(0);
+}
+
+/* 3. 最舊號碼向右滑出淡出 */
+.history-item.item-exit {
+    position: absolute;
+    right: 0;
+    bottom: 75px;
+    opacity: 0.8;
+    transform: translateX(0);
+    transition: transform calc(var(--hist1-dur) * 0.6) var(--hist1-ease),
+                opacity calc(var(--hist1-dur) * 0.5) var(--hist1-ease);
+    pointer-events: none;
+}
+.history-item.item-exit.item-exit-active {
+    opacity: 0;
+    transform: translateX(120px);
+}
+
+/* 直向排版模式 (Index 1 在上、Index 0 在下) */
+.history-area.layout-vertical {
+    flex-direction: column-reverse;
+    justify-content: flex-start;
+    align-items: flex-end;
+    padding-bottom: 58px;
+    gap: 8px;
+}
+.history-area.layout-vertical .history-item {
+    font-size: 68px;
+    line-height: 1;
+    margin-right: 0;
+    padding: 2px 10px;
+}
+/* 直向 1. 新號碼進場 (Index 0)：由下方滑入 + 淡入 */
+.history-area.layout-vertical .history-item.item-enter {
+    transform: translateY(40px);
+    opacity: 0;
+    transition: transform var(--hist1-dur) var(--hist1-ease),
+                opacity var(--hist1-dur) var(--hist1-ease);
+}
+.history-area.layout-vertical .history-item.item-enter.item-enter-active {
+    transform: translateY(0);
+    opacity: 0.8;
+}
+/* 直向 2. 舊號碼向上推移 (Index 0 -> Index 1) */
+.history-area.layout-vertical .history-item.item-shift {
+    transform: translateY(calc(100% + 8px));
+    transition: transform var(--hist2-dur) var(--hist2-ease);
+}
+.history-area.layout-vertical .history-item.item-shift.item-shift-active {
+    transform: translateY(0);
+}
+/* 直向 3. 最舊號碼向上滑出淡出 */
+.history-area.layout-vertical .history-item.item-exit {
+    position: absolute;
+    right: 0;
+    bottom: auto;
+    opacity: 0.8;
+    transform: translateY(0);
+    transition: transform calc(var(--hist1-dur) * 0.6) var(--hist1-ease),
+                opacity calc(var(--hist1-dur) * 0.5) var(--hist1-ease);
+    pointer-events: none;
+}
+.history-area.layout-vertical .history-item.item-exit.item-exit-active {
+    opacity: 0;
+    transform: translateY(-40px);
+}
+
+/* 方案 A：六筆直列（小字階梯、簡化動畫） */
+.history-area.mode-stack-a {
+    flex-direction: column-reverse;
+    justify-content: flex-start;
+    align-items: flex-end;
+    padding-bottom: 10px;
+    gap: 0;
+    max-width: 210px;
+}
+.history-area.mode-stack-a .history-item {
+    font-size: 44px;
+    margin-right: 0;
+    padding: 0 4px;
+    line-height: 1.05;
+}
+.history-area.mode-stack-a .history-item[data-hist-index="0"] { font-size: 50px; opacity: 0.92; }
+.history-area.mode-stack-a .history-item[data-hist-index="1"] { font-size: 46px; }
+.history-area.mode-stack-a .history-item[data-hist-index="2"] { font-size: 42px; }
+.history-area.mode-stack-a .history-item[data-hist-index="3"] { font-size: 38px; opacity: 0.78; }
+.history-area.mode-stack-a .history-item[data-hist-index="4"] { font-size: 34px; opacity: 0.72; }
+.history-area.mode-stack-a .history-item[data-hist-index="5"] { font-size: 30px; opacity: 0.66; }
+
+/* 方案 B：六格 3×2 網格（上三下三）+ 單號 / 多號橫幅狀態 */
+#qms-banner.banner-grid-b.grid-b-solo:not(.standby-mode) .main-number-area {
+    left: 50%;
+    transform: translateX(-50%);
+    justify-content: center;
+    width: auto;
+}
+#qms-banner.banner-grid-b.grid-b-active .logo-area {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-50%) scale(0.65);
+    transition: opacity 0.45s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.45s;
+}
+#qms-banner.banner-grid-b.grid-b-solo:not(.standby-mode) .logo-area {
+    opacity: 1;
+    visibility: visible;
+}
+#qms-banner.banner-grid-b.grid-b-active .main-number-area {
+    left: 36px;
+    transform: translateX(0);
+    justify-content: flex-start;
+    align-items: center;
+    width: 248px;
+    padding-bottom: 0;
+}
+#qms-banner.banner-grid-b.grid-b-active #main-number {
+    font-size: 112px;
+    letter-spacing: 3px;
+}
+#qms-banner.banner-grid-b.grid-b-solo:not(.standby-mode) .history-area.mode-grid-b {
+    opacity: 0;
+    pointer-events: none;
+}
+#qms-banner.banner-grid-b.grid-b-active .history-area.mode-grid-b {
+    opacity: 1;
+    left: 292px;
+    right: 32px;
+    width: auto;
+    height: 100%;
+    align-content: center;
+    padding-bottom: 0;
+}
+.history-area.mode-grid-b {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(64px, 1fr));
+    grid-template-rows: repeat(2, auto);
+    gap: 12px 10px;
+    justify-items: center;
+    align-items: center;
+}
+.history-area.mode-grid-b .history-item {
+    font-size: 72px;
+    font-weight: bold;
+    margin-right: 0;
+    padding: 0 14px;
+    opacity: 0.8;
+    justify-self: center;
+}
+
+/* 方案 B 六格專用：原地柔和淡出 + 縮小退場 (不脫離網格、不往外飛甩) */
+.history-area.mode-grid-b .history-item.item-exit {
+    position: relative !important;
+    right: auto !important;
+    bottom: auto !important;
+    opacity: 0.8;
+    transform: scale(1);
+    transition: opacity 0.35s ease-out, transform 0.35s ease-out !important;
+    pointer-events: none;
+}
+.history-area.mode-grid-b .history-item.item-exit.item-exit-active {
+    opacity: 0 !important;
+    transform: scale(0.75) !important;
 }
 
 /* ==========================================================================
-   隱藏式除錯/測試面板 (按 'T' 鍵或雙擊頂部切換)
+   下方固定 85% (1632px) - 電子菜單 (#menu-area)
+   ========================================================================== */
+#menu-area {
+    position: absolute;
+    top: 288px;
+    left: 0;
+    width: 1080px;
+    height: 1632px;
+    background-color: #111;
+}
+
+#menu-area img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.no-image-text {
+    color: #666;
+    text-align: center;
+    line-height: 1632px;
+    font-size: 50px;
+}
+
+/* ==========================================================================
+   測試與動態調校面板 (#debug-panel)
    ========================================================================== */
 #debug-panel {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: rgba(15, 23, 42, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  padding: 14px;
-  z-index: 999;
-  display: none;
-  flex-direction: column;
-  gap: 10px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-  min-width: 260px;
-  backdrop-filter: blur(10px);
+    position: absolute;
+    top: 300px;
+    right: 20px;
+    width: 580px;
+    max-height: 82vh;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.88);
+    border: 2px solid #fff;
+    border-radius: 10px;
+    padding: 20px;
+    color: #fff;
+    z-index: 100;
+    display: none;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    font-family: sans-serif;
 }
 
-#debug-panel.visible {
-  display: flex;
+.debug-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #555;
+    padding-bottom: 8px;
 }
 
-.debug-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--guiji-yellow);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.debug-header h3 {
+    margin: 0;
+    font-size: 26px;
+    color: #dbee0f;
 }
 
-.debug-close {
-  cursor: pointer;
-  color: var(--text-muted);
-  font-size: 18px;
-  font-weight: bold;
+.debug-hint {
+    font-size: 16px;
+    color: #888;
 }
 
-.debug-input-group {
-  display: flex;
-  gap: 6px;
+.debug-section {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
 }
 
-.debug-input {
-  flex: 1;
-  background: #1e293b;
-  border: 1px solid #334155;
-  color: #fff;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 14px;
-  outline: none;
+.debug-control-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 6px;
 }
 
-.debug-btn {
-  background: var(--guiji-yellow);
-  color: #000;
-  border: none;
-  font-weight: 700;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
+.debug-control-box {
+    margin-bottom: 12px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 6px;
 }
 
-.debug-btn-secondary {
-  background: #334155;
-  color: #fff;
+.debug-control-box.highlight-green {
+    background: rgba(72, 91, 40, 0.35);
+    border: 1px solid #485b28;
 }
 
-.debug-btn-danger {
-  background: #ef4444;
-  color: #fff;
+.debug-label {
+    font-size: 18px;
+    color: #fff;
+    font-weight: bold;
 }
 
-.debug-quick-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+.debug-label.accent {
+    color: #dbee0f;
 }
 
-.quick-tag-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #e2e8f0;
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  cursor: pointer;
+.debug-subtext {
+    font-size: 13px;
+    color: #aaa;
+    line-height: 1.4;
 }
 
-/* 掃描狀態浮動提示 */
-.scan-toast {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%) translateY(50px);
-  background: rgba(0, 0, 0, 0.85);
-  border: 1px solid var(--guiji-yellow);
-  color: #fff;
-  padding: 8px 20px;
-  border-radius: 20px;
-  font-size: 16px;
-  opacity: 0;
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-  pointer-events: none;
-  z-index: 100;
+.debug-subtext code {
+    color: #ccc;
 }
 
-.scan-toast.show {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
+#debug-panel input[type="text"],
+#debug-panel select {
+    font-size: 17px;
+    padding: 6px 10px;
+    background: #333;
+    color: #fff;
+    border: 1px solid #666;
+    border-radius: 4px;
+    flex-grow: 1;
+    margin-left: 10px;
+}
+
+#debug-panel input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+}
+
+#debug-panel button {
+    padding: 10px 15px;
+    font-size: 18px;
+    cursor: pointer;
+    background: #485b28;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    transition: background 0.2s, opacity 0.2s;
+}
+
+#debug-panel button:hover {
+    background: #5a7232;
+}
+
+.debug-btn-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.debug-btn-row:last-child {
+    margin-bottom: 0;
+}
+
+#debug-panel button.btn-primary-test {
+    flex: 2;
+    background: #dbee0f;
+    color: #000;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+#debug-panel button.btn-primary-test:hover {
+    background: #c8da0d;
+}
+
+#debug-panel button.btn-clear {
+    flex: 1;
+    background: #444;
+    color: #fff;
+    font-size: 18px;
+    border-radius: 6px;
+}
+
+#debug-panel button.btn-clear:hover {
+    background: #555;
+}
+
+#debug-panel button.btn-quick {
+    flex: 1;
+    padding: 6px;
+    font-size: 16px;
+}
+
+#debug-panel button.btn-mute {
+    flex: 1.2;
+    padding: 6px;
+    font-size: 16px;
+}
+
+#mute-btn.muted {
+    background: #a00;
+}
+
+#demo-btn.active {
+    background: #dbee0f;
+    color: #000;
+    font-weight: bold;
+}
+
+.debug-presets {
+    margin-bottom: 18px;
+}
+
+.debug-presets-title {
+    font-size: 18px;
+    color: #aaa;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.debug-presets-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+#debug-panel button.preset-btn {
+    font-size: 18px;
+    padding: 8px;
+    text-align: left;
+}
+#debug-panel button.preset-btn span {
+    font-size: 13px;
+    color: #aaa;
+}
+#debug-panel button.preset-clean { background: #2a3a1e; }
+#debug-panel button.preset-smooth { background: #1e333a; }
+#debug-panel button.preset-bounce { background: #3a2e1e; }
+#debug-panel button.preset-stagger { background: #3a1e35; }
+
+.debug-divider {
+    border-color: #444;
+    margin: 15px 0;
+}
+
+.debug-param-card {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 15px;
+}
+
+.debug-param-card.card-item1 {
+    border: 1px solid #485b28;
+}
+
+.debug-param-card.card-item2 {
+    border: 1px solid #334;
+    margin-bottom: 0;
+}
+
+.debug-param-title {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.debug-param-title.title-item1 { color: #dbee0f; }
+.debug-param-title.title-item2 { color: #64b5f6; }
+
+.debug-slider-group {
+    margin-bottom: 12px;
+}
+.debug-slider-group:last-child {
+    margin-bottom: 4px;
+}
+
+.debug-slider-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+    color: #eee;
+    margin-bottom: 4px;
 }
