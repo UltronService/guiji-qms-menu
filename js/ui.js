@@ -286,8 +286,47 @@ const QMSUI = (() => {
     }
 
     /**
-     * 8. 背景影片與靜態菜單輔助
+     * 8. 背景影片、離線安全底色保護與靜態菜單輔助
      */
+    function initVideoFallback() {
+        const bgVideo = document.getElementById('qms-video-bg');
+        const banner = document.getElementById('qms-banner');
+        if (!bgVideo || !banner) return;
+
+        const markReady = () => banner.classList.remove('video-fallback');
+        const markFallback = () => banner.classList.add('video-fallback');
+
+        bgVideo.addEventListener('loadeddata', markReady);
+        bgVideo.addEventListener('playing', markReady);
+        bgVideo.addEventListener('error', markFallback);
+
+        const sources = bgVideo.querySelectorAll('source');
+        if (sources.length > 0) {
+            const lastSource = sources[sources.length - 1];
+            lastSource.addEventListener('error', markFallback);
+        }
+    }
+
+    function updateOfflineBadge(swReady = false) {
+        const badge = document.getElementById('offline-status-badge');
+        if (!badge) return;
+        const isOnline = navigator.onLine !== false;
+        const isFileProtocol = window.location.protocol === 'file:';
+
+        if (isFileProtocol) {
+            badge.textContent = '🛡️ 本機檔案離線運作中 · 按 T 關閉';
+            badge.style.color = '#8bc34a';
+        } else if (isOnline) {
+            badge.textContent = swReady
+                ? '🟢 連線正常 (離線快取已就緒) · 按 T 關閉'
+                : '🟢 連線正常 · 按 T 關閉';
+            badge.style.color = '#8bc34a';
+        } else {
+            badge.textContent = '🟠 外網斷線 (100% 離線保護運作中) · 按 T 關閉';
+            badge.style.color = '#ffb74d';
+        }
+    }
+
     function updateVideoPlayback() {
         const bgVideo = document.getElementById('qms-video-bg');
         if (bgVideo) {
@@ -401,6 +440,8 @@ const QMSUI = (() => {
         syncGridBBannerState,
         updateUI,
         animateMainNumber,
+        initVideoFallback,
+        updateOfflineBadge,
         updateVideoPlayback,
         ensureVideoPlay,
         showNoImage,

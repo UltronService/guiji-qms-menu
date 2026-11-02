@@ -3,30 +3,103 @@
    畫布規格：1080x1920 (9:16 直立式滿版自適應縮放)
    ========================================================================== */
 
-/* 1. 字體定義 (@font-face) */
+/* 1. 字體定義 (@font-face - 100% 本地離線字體) */
 @font-face {
     font-family: 'Greycliff CF';
     src: url('../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-regular.otf') format('opentype');
     font-weight: 400;
     font-style: normal;
+    font-display: swap;
 }
 @font-face {
     font-family: 'Greycliff CF';
     src: url('../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-bold.otf') format('opentype');
     font-weight: 700;
     font-style: normal;
+    font-display: swap;
 }
 @font-face {
     font-family: 'Greycliff CF';
     src: url('../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-extrabold.otf') format('opentype');
     font-weight: 800;
     font-style: normal;
+    font-display: swap;
 }
 @font-face {
     font-family: 'Greycliff CF';
     src: url('../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-heavy.otf') format('opentype');
     font-weight: 900;
     font-style: normal;
+    font-display: swap;
+}
+
+/* Montserrat 本地離線字體 */
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../assets/fonts/montserrat-700.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../assets/fonts/montserrat-800.woff2') format('woff2');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../assets/fonts/montserrat-900.woff2') format('woff2');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Poppins 本地離線字體 */
+@font-face {
+    font-family: 'Poppins';
+    src: url('../assets/fonts/poppins-700.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Poppins';
+    src: url('../assets/fonts/poppins-800.woff2') format('woff2');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Poppins';
+    src: url('../assets/fonts/poppins-900.woff2') format('woff2');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Nunito 本地離線字體 */
+@font-face {
+    font-family: 'Nunito';
+    src: url('../assets/fonts/nunito-700.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Nunito';
+    src: url('../assets/fonts/nunito-800.woff2') format('woff2');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Nunito';
+    src: url('../assets/fonts/nunito-900.woff2') format('woff2');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
 }
 
 /* 2. 全域 CSS 變數 (由動態調校面板即時控制) */
@@ -116,6 +189,14 @@ html, body {
 /* 待機模式 - 綠色遮罩隱藏，完全顯示影片，主號與歷史區隱藏 */
 #qms-banner.standby-mode::before {
     opacity: 0;
+}
+
+/* 若影片無法播放時之離線安全底色保護：保留品牌草本綠底 */
+#qms-banner.video-fallback {
+    background-color: #485b28;
+}
+#qms-banner.video-fallback.standby-mode::before {
+    opacity: 1;
 }
 
 .standby-mode .main-number-area,

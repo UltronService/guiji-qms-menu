@@ -6,7 +6,10 @@
 
 * **自適應滿版縮放**：採用原生 CSS `transform: scale` 與 JavaScript 計算，自動等比縮放以適應不同的螢幕與預覽視窗，無捲軸干擾。
 * **USB 掃碼槍支援 (HID 模式)**：全域監聽鍵盤連發事件，並具備 Buffer 緩衝邏輯以精準捕捉掃碼槍的高速輸入 (過濾 <100ms 間隔字元)，支援純數字自動正規化 3 碼及英數混合單號 (例如 `A01`, `088`)。
-* **狀態保存 (LocalStorage)**：斷電或重新整理時，自動從 `localStorage` 復原最新的主號碼、歷史號碼、顯示模式與外觀設定。
+* **100% 斷網強化與離線持久化 (Offline-First Hardening)**：
+  * **PWA Service Worker (`sw.js`)**：支援網址部署下的全資源預先快取（包含 HTML、CSS、JS、菜單圖片、所有字體與橫幅背景影片），並實作 HTTP `206 Partial Content` Range 離線串流支援。即使門市斷網數日且每日關機重開，機上盒開啟網址時仍可直接從本機快取秒開運作。
+  * **全資源本地化 (`assets/`)**：橫幅背景影片 (`assets/maxhomevideo2.webm`) 與開源字體 (`Montserrat`、`Poppins`、`Nunito` `.woff2`) 均已內建於專案目錄，完全不依賴外部 Google Fonts 或第三方圖床。
+  * **狀態保存 (`localStorage`)**：斷電或重新整理時，自動從 `localStorage` 復原最新的主號碼、歷史號碼、顯示模式與外觀設定。
 * **聲光回饋 (100% 離線合成)**：
   * **音效**：使用 `Web Audio API` 雙正弦波合成清脆的雙音「Ding-Dong」，不依賴任何外部 MP3/WAV 檔案。
   * **語音廣播**：調用原生 `Web Speech API` 進行 TTS 語音合成朗讀 (「請，X X X，取餐」)。
@@ -33,18 +36,21 @@
 
 ```text
 ├── index.html          # 主頁面結構 (語意化 HTML 與調校面板)
+├── manifest.json       # PWA 全螢幕應用程式清單
+├── sw.js               # Service Worker (100% 離線資源預快取與影片 Range 支援)
 ├── css/
-│   └── style.css       # 全域樣式、橫幅與歷史模式排版、GPU 動畫與調校面板樣式
+│   └── style.css       # 全域樣式、本地 @font-face、歷史模式排版、GPU 動畫與面板樣式
 ├── js/
 │   ├── audio.js        # QMSAudio：Web Audio 雙音合成與 Web Speech 語音播報模組
 │   ├── scanner.js      # QMSScanner：USB HID 掃碼槍高速緩衝監聽與快捷鍵模組
 │   ├── ui.js           # QMSUI：視窗縮放、統一歷史 DOM 差動渲染引擎與面板控制模組
-│   └── app.js          # QMSApp：核心狀態管理、LocalStorage 持久化與叫號邏輯控制器
+│   └── app.js          # QMSApp：核心狀態管理、Service Worker 註冊與叫號邏輯控制器
 └── assets/
-    ├── menu.jpg        # 電子菜單底圖
-    ├── logo2.svg       # 龜記品牌 Logo (綠字版)
-    ├── logo2_white.svg # 龜記品牌 Logo (白字版)
-    └── fonts/          # 內嵌數字字體資源
+    ├── menu.jpg            # 電子菜單底圖
+    ├── maxhomevideo2.webm  # 本地橫幅背景動態影片 (離線播放)
+    ├── logo2.svg           # 龜記品牌 Logo (綠字版)
+    ├── logo2_white.svg     # 龜記品牌 Logo (白字版)
+    └── fonts/              # 內嵌數字字體資源 (Montserrat / Poppins / Nunito / Greycliff CF)
 ```
 
 ## 🚀 部署與執行

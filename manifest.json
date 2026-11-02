@@ -1,0 +1,19 @@
+{
+  "name": "龜記叫號取餐系統與電子菜單看板",
+  "short_name": "龜記叫號看板",
+  "description": "100% 離線運作之 9:16 直立式叫號取餐系統與電子菜單看板",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#485b28",
+  "icons": [
+    {
+      "src": "assets/logo2_white.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

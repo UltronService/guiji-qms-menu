@@ -318,8 +318,28 @@ const QMSApp = (() => {
     }
 
     /**
-     * 6. 啟動初始化
+     * 6. 離線強化 Service Worker 註冊與啟動初始化
      */
+    let swReady = false;
+
+    function registerOfflineServiceWorker() {
+        const isHttp = window.location.protocol === 'http:' || window.location.protocol === 'https:';
+        if (!isHttp || !('serviceWorker' in navigator)) {
+            QMSUI.updateOfflineBadge(false);
+            return;
+        }
+
+        navigator.serviceWorker.register('./sw.js')
+            .then(() => navigator.serviceWorker.ready)
+            .then(() => {
+                swReady = true;
+                QMSUI.updateOfflineBadge(true);
+            })
+            .catch(() => {
+                QMSUI.updateOfflineBadge(false);
+            });
+    }
+
     function init() {
         // 視窗縮放綁定
         window.addEventListener('resize', QMSUI.resizeViewport);
@@ -338,12 +358,18 @@ const QMSApp = (() => {
         }, { once: true });
         window.addEventListener('keydown', QMSUI.ensureVideoPlay, { once: true });
 
-        // DOM 載入完成後復原狀態
+        // 監聽外網連線與斷網事件
+        window.addEventListener('online', () => QMSUI.updateOfflineBadge(swReady));
+        window.addEventListener('offline', () => QMSUI.updateOfflineBadge(swReady));
+
+        // DOM 載入完成後復原狀態並註冊離線快取
         window.addEventListener('DOMContentLoaded', () => {
+            QMSUI.initVideoFallback();
             QMSUI.restoreAppearancePrefs();
             loadState();
             onParamChange();
             QMSUI.updateVideoPlayback();
+            registerOfflineServiceWorker();
         });
     }
 

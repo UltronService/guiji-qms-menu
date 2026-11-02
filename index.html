@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <!-- 鎖定 Viewport，禁止縮放 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#485b28">
     <title>龜記叫號取餐系統與電子菜單看板</title>
-    <!-- 引入開源免費字體作為選項 (供 Android 系統使用) -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Nunito:wght@700;800;900&family=Poppins:wght@700;800;900&display=swap" rel="stylesheet">
-    <!-- 主樣式表 -->
+    <!-- PWA 離線清單 -->
+    <link rel="manifest" href="manifest.json">
+    <!-- 主樣式表 (內含 100% 本地離線字體) -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -15,8 +16,9 @@
 <div id="viewport-container">
     <!-- 上方 15% 叫號橫幅 -->
     <div id="qms-banner" ondblclick="toggleDebugPanel()">
-        <!-- 背景影片 -->
+        <!-- 背景影片 (優先讀取本地離線影片，外部網址作為備援) -->
         <video id="qms-video-bg" autoplay loop muted playsinline>
+            <source src="assets/maxhomevideo2.webm" type="video/webm">
             <source src="https://goods-pics.haha.tw/guiji/maxhomevideo2.webm" type="video/webm">
         </video>
 
@@ -64,7 +66,7 @@
     <div id="debug-panel">
         <div class="debug-header">
             <h3>🎛️ 動態調校面板</h3>
-            <span class="debug-hint">按 T 關閉</span>
+            <span id="offline-status-badge" class="debug-hint" style="color: #8bc34a;">🛡️ 100% 離線模式就緒 · 按 T 關閉</span>
         </div>
 
         <!-- 快速測試區與外觀設定 -->
