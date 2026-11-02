@@ -7,12 +7,16 @@
  * ==========================================================================
  */
 
-const CACHE_NAME = 'guiji-qms-offline-v1';
+const CACHE_NAME = 'guiji-qms-offline-v2';
 
 const PRECACHE_ASSETS = [
     './',
     './index.html',
     './manifest.json',
+    './favicon.ico',
+    './assets/icon-180.png',
+    './assets/icon-192.png',
+    './assets/icon-512.png',
     './css/style.css',
     './js/audio.js',
     './js/scanner.js',
