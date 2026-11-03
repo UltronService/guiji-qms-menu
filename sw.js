@@ -7,7 +7,7 @@
  * ==========================================================================
  */
 
-const CACHE_NAME = 'guiji-qms-offline-v2';
+const CACHE_NAME = 'guiji-qms-offline-v3';
 
 const PRECACHE_ASSETS = [
     './',

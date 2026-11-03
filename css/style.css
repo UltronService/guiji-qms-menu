@@ -139,6 +139,7 @@ html, body {
 #viewport-container {
     width: 1080px;
     height: 1920px;
+    flex-shrink: 0;
     position: relative;
     transform-origin: center center;
     background-color: #000;
