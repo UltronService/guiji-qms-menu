@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <!-- 鎖定 Viewport，禁止縮放 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#485b28">
+    <title>龜記叫號看板 · IP 角色動畫版</title>
+    <link rel="icon" href="favicon.ico" sizes="48x48">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png">
+    <!-- 主樣式表 (內含 100% 本地離線字體) -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/ip-anim.css">
+</head>
+<body>
+
+<div id="viewport-container">
+    <!-- 上方 15% 叫號橫幅 -->
+    <div id="qms-banner" ondblclick="toggleDebugPanel()">
+        <!-- 背景影片 (本地離線影片，由 Service Worker 預先快取) -->
+        <video id="qms-video-bg" autoplay loop muted playsinline>
+            <source src="assets/maxhomevideo2.webm" type="video/webm">
+        </video>
+
+        <!-- IP 角色動畫層（不遮擋主號與歷史區） -->
+        <div id="ip-characters" class="ip-characters" aria-hidden="true">
+            <div class="ip-sign-act" id="ip-sign-act">
+                <div class="ip-sign-slider">
+                    <div class="ip-sign-char">
+                        <img data-ip-src="characters/thinker-sit.svg" width="200" height="200" alt="">
+                    </div>
+                    <div class="ip-sign-board">
+                        <span class="ip-sign-number" id="ip-sign-number">000</span>
+                    </div>
+                </div>
+            </div>
+            <div class="ip-bob ip-bob-a">
+                <img data-ip-src="characters/little-stand.svg" width="118" height="168" alt="">
+            </div>
+            <div class="ip-bob ip-bob-b">
+                <img data-ip-src="characters/thinker-stand.svg" width="118" height="168" alt="">
+            </div>
+            <div class="ip-jump" id="ip-jumper">
+                <img data-ip-src="characters/leader-stand.svg" width="132" height="190" alt="">
+            </div>
+        </div>
+
+        <!-- 左側 Logo -->
+        <div class="logo-area">
+            <svg id="_圖層_2" data-name="圖層 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 103.62 34.61">
+                <defs>
+                    <style>
+                        .cls-1 { fill: #fff; }
+                    </style>
+                </defs>
+                <g id="_圖層_1-2" data-name="圖層 1">
+                    <g>
+                        <path class="cls-1" d="M33.88,18.34c0-6.13,4.82-10.8,10.77-10.8,3.02,0,5.47,1.11,7.3,2.96.24.24.24.48,0,.78l-2,2.12c-.21.24-.45.24-.66.06-1.26-1.05-2.75-1.73-4.61-1.73-3.68,0-6.46,2.81-6.46,6.61s2.78,6.58,6.67,6.58c3.29,0,5.23-1.94,5.32-4.31h-5.32c-.27,0-.45-.18-.45-.45v-2.9c0-.27.18-.45.45-.45h9.03c.27,0,.45.18.45.45v1.94c0,5.47-3.62,9.9-9.63,9.9s-10.86-4.64-10.86-10.77"/>
+                        <path class="cls-1" d="M59.34,23.24v-8.24c0-.26.17-.43.43-.43h3.12c.26,0,.43.17.43.43v7.34c0,1.99.92,3.06,2.63,3.06s2.77-1.07,2.77-3.06v-7.34c0-.26.17-.43.43-.43h3.09c.26,0,.46.17.46.43v13.3c0,.26-.2.43-.46.43h-2.98c-.26,0-.4-.12-.43-.46l-.12-1.68c-.81,1.45-2.17,2.49-4.28,2.49-2.98,0-5.12-2.14-5.12-5.84"/>
+                        <rect class="cls-1" x="78.53" y="14.57" width="4.02" height="14.16" rx=".43" ry=".43"/>
+                        <path class="cls-1" d="M78.22,10.54c0-1.27,1-2.31,2.34-2.31s2.31,1.03,2.31,2.31-.97,2.34-2.31,2.34-2.34-1.03-2.34-2.34"/>
+                        <path class="cls-1" d="M85.76,31.02c0-.2.17-.23.38-.2.46.09.84.14,1.19.14,1.39,0,1.71-.72,1.71-1.76v-14.19c0-.26.17-.43.43-.43h3.15c.26,0,.43.17.43.43v14.74c0,3.3-1.82,4.77-4.86,4.77-.78,0-1.39-.06-2.17-.43-.17-.09-.26-.26-.26-.43v-2.63Z"/>
+                        <path class="cls-1" d="M88.71,10.54c0-1.27,1-2.31,2.34-2.31s2.31,1.03,2.31,2.31-.97,2.34-2.31,2.34-2.34-1.03-2.34-2.34"/>
+                        <rect class="cls-1" x="99.29" y="14.57" width="4.02" height="14.16" rx=".43" ry=".43"/>
+                        <path class="cls-1" d="M98.98,10.54c0-1.27,1-2.31,2.34-2.31s2.31,1.03,2.31,2.31-.97,2.34-2.31,2.34-2.34-1.03-2.34-2.34"/>
+                        <path class="cls-1" d="M19.76,5.17c-.52-.23-.9-.69-1.01-1.24-.42-2.23-2.38-3.93-4.74-3.93s-4.32,1.69-4.74,3.93c-.1.56-.49,1.01-1.01,1.24C3.4,7.36,0,12.27,0,17.96v2.45c0,7.73,6.18,14.14,13.91,14.19,7.79.06,14.12-6.24,14.12-14.02v-2.63c0-5.69-3.4-10.6-8.27-12.79M11,18.83l2.08,2.08c.1.11.28.03.28-.12v-2.75c0-.44-.18-.86-.49-1.18l-1.95-1.95c-.26-.26-.26-.67,0-.93.26-.26.67-.26.93,0l1.22,1.22c.1.1.28.03.28-.12v-4.58c0-.38.33-.69.72-.65.34.03.59.34.59.68v4.56c0,.15.18.22.28.12l1.22-1.22c.26-.26.67-.26.93,0,.26.26.26.67,0,.93l-1.95,1.95c-.31.31-.49.74-.49,1.18v2.75c0,.15.18.22.28.12l2.1-2.1c.26-.26.67-.26.93,0s.26.67,0,.93l-2.82,2.82c-.31.31-.49.74-.49,1.18v3.42c0,.38-.33.69-.72.65-.34-.03-.59-.34-.59-.68v-3.39c0-.44-.18-.86-.49-1.18l-2.82-2.82c-.27-.27-.26-.72.05-.97.26-.22.66-.18.9.06M25.19,20.55c0,6.16-5.01,11.17-11.17,11.17S2.85,26.71,2.85,20.55v-2.52c0-4.44,2.63-8.46,6.7-10.24.33-.15.72,0,.86.34.14.33,0,.72-.34.86-3.59,1.57-5.91,5.12-5.91,9.03v2.52c0,5.43,4.42,9.86,9.86,9.86s9.86-4.42,9.86-9.86v-2.52c0-3.92-2.32-7.46-5.91-9.03-.33-.15-.48-.53-.34-.86.15-.33.53-.48.86-.34,4.07,1.78,6.7,5.8,6.7,10.24v2.52Z"/>
+                    </g>
+                </g>
+            </svg>
+        </div>
+
+        <!-- 中間 主號碼 -->
+        <div class="main-number-area">
+            <div id="main-number">---</div>
+        </div>
+
+        <!-- 右側 歷史號碼 -->
+        <div class="history-area" id="history-area">
+            <!-- JS 動態產生 -->
+        </div>
+    </div>
+
+    <!-- 下方 85% 菜單 -->
+    <div id="menu-area">
+        <img src="assets/menu.jpg" alt="電子菜單" onerror="showNoImage(this)">
+    </div>
+
+    <!-- 測試與除錯面板 -->
+    <div id="debug-panel">
+        <div class="debug-header">
+            <h3>🎛️ 動態調校面板</h3>
+            <span id="offline-status-badge" class="debug-hint" style="color: #8bc34a;">🛡️ 100% 離線模式就緒 · 按 T 關閉</span>
+        </div>
+
+        <!-- 快速測試區與外觀設定 -->
+        <div class="debug-section">
+            <!-- 字體選擇 -->
+            <div class="debug-control-row">
+                <span class="debug-label">🔤 數字字體：</span>
+                <select id="font-selector" onchange="changeFont()">
+                    <option value="'Greycliff CF', sans-serif">Greycliff CF (有浮水印)</option>
+                    <option value="'Montserrat', sans-serif" selected>Montserrat (開源免費)</option>
+                    <option value="'Poppins', sans-serif">Poppins (開源免費)</option>
+                    <option value="'Nunito', sans-serif">Nunito (開源圓潤)</option>
+                    <option value="Arial, sans-serif">系統預設 (Arial)</option>
+                </select>
+            </div>
+
+            <!-- 歷史顯示模式（經典 / 方案 A / 方案 B） -->
+            <div class="debug-control-box highlight-green">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span class="debug-label accent">📺 歷史顯示模式：</span>
+                    <select id="display-mode-selector" onchange="changeDisplayMode(this.value)" style="max-width: 280px;">
+                        <option value="classic" selected>經典（1 主 + 2 歷史 · 原版）</option>
+                        <option value="stack-a">方案 A · 六筆直列</option>
+                        <option value="grid-b">方案 B · 六格網格</option>
+                    </select>
+                </div>
+                <div class="debug-subtext">
+                    預設為經典。URL 預覽：<code>?mode=classic</code> · <code>?mode=a</code> · <code>?mode=b</code>
+                </div>
+            </div>
+
+            <!-- 歷史號碼排版方式（僅經典模式） -->
+            <div id="layout-selector-row" class="debug-control-row">
+                <span class="debug-label">📑 歷史號碼排版：</span>
+                <select id="layout-selector" onchange="changeLayout(this.value)">
+                    <option value="horizontal" selected>橫向 (左新 右舊)</option>
+                    <option value="vertical">直向 (下新 上舊)</option>
+                </select>
+            </div>
+
+            <!-- 方案 B · 六格排版（B1–B4，供業主試看） -->
+            <div id="grid-b-layout-row" class="debug-control-row">
+                <span class="debug-label">⊞ 方案 B 六格排版：</span>
+                <select id="grid-b-layout-selector" onchange="changeGridBLayout(this.value)">
+                    <option value="b1" selected>B1 上排新 / 下排舊（左→右）· 預設</option>
+                    <option value="b2">B2 下排新 / 上排舊</option>
+                    <option value="b3">B3 上→下、左→右填格</option>
+                    <option value="b4">B4 右上最新</option>
+                </select>
+            </div>
+
+            <!-- IP 角色動畫開關 -->
+            <div class="debug-control-box highlight-green">
+                <span class="debug-label accent">🐢 IP 橫幅動畫：</span>
+                <div class="debug-control-row" style="margin-top: 8px; flex-wrap: wrap; gap: 12px;">
+                    <label><input type="checkbox" id="ip-toggle-a" class="ip-effect-toggle" data-ip-effect="a" checked> A 舉號碼牌</label>
+                    <label><input type="checkbox" id="ip-toggle-b" class="ip-effect-toggle" data-ip-effect="b" checked> B 待機輕晃</label>
+                    <label><input type="checkbox" id="ip-toggle-c" class="ip-effect-toggle" data-ip-effect="c" checked> C 叫號慶祝</label>
+                </div>
+                <div class="debug-subtext">
+                    URL：<code>?ipA=0</code> · <code>?ipB=0</code> · <code>?ipC=0</code> 可關閉單一效果（1/on 為開）
+                </div>
+            </div>
+
+            <!-- 綠底透明度設定 -->
+            <div class="debug-control-box">
+                <div class="debug-slider-header">
+                    <span class="debug-label">🟩 綠底透明度：</span>
+                    <b id="opacity-val" style="color: #dbee0f; font-size: 20px;">0.80</b>
+                </div>
+                <input type="range" id="banner-opacity-slider" min="0" max="1" step="0.05" value="0.8" oninput="changeBannerOpacity()">
+            </div>
+
+            <!-- 手動輸入單號 -->
+            <div class="debug-control-row">
+                <span class="debug-label">⌨️ 手動單號：</span>
+                <input type="text" id="manual-input" placeholder="輸入號碼 (如 A01, 088)">
+                <button onclick="submitManual()" style="margin-left: 8px;">叫號</button>
+            </div>
+
+            <!-- 主要測試動作列 -->
+            <div class="debug-btn-row">
+                <button class="btn-primary-test" onclick="testNextNumber()">
+                    ▶ 立即測試 (下一號)
+                </button>
+                <button id="demo-btn" class="btn-clear" onclick="toggleDemoMode()">
+                    ⏱ Demo: 關
+                </button>
+                <button class="btn-clear" onclick="clearHistory()">
+                    ↺ 清空歷史
+                </button>
+            </div>
+
+            <!-- 快速單號與靜音切換 -->
+            <div class="debug-btn-row">
+                <button class="btn-quick" onclick="processScan('321')">321</button>
+                <button class="btn-quick" onclick="processScan('322')">322</button>
+                <button class="btn-quick" onclick="processScan('323')">323</button>
+                <button class="btn-quick" onclick="processScan('A01')">A01</button>
+                <button class="btn-quick" onclick="processScan('088')">088</button>
+                <button id="mute-btn" class="btn-mute" onclick="toggleMute()">🔊 聲音: 開</button>
+            </div>
+        </div>
+
+        <!-- 一鍵風格預設 -->
+        <div class="debug-presets">
+            <div class="debug-presets-title">⚡ 快速套用推薦風格：</div>
+            <div class="debug-presets-grid">
+                <button class="preset-btn preset-clean" onclick="applyPreset('clean')">
+                    🟢 <b>俐落標準</b><br><span>0.4s 無回彈、乾淨</span>
+                </button>
+                <button class="preset-btn preset-smooth" onclick="applyPreset('smooth')">
+                    🌊 <b>極致絲滑</b><br><span>0.6s 蘋果風優雅緩出</span>
+                </button>
+                <button class="preset-btn preset-bounce" onclick="applyPreset('bounce')">
+                    🎾 <b>輕巧 Q 彈</b><br><span>微衝過頭、活潑彈性</span>
+                </button>
+                <button class="preset-btn preset-stagger" onclick="applyPreset('stagger')">
+                    💥 <b>火車連鎖差動</b><br><span>舊號碼帶有抗力與延遲</span>
+                </button>
+            </div>
+        </div>
+
+        <hr class="debug-divider">
+
+        <!-- Item 1 (新號碼進場) -->
+        <div class="debug-param-card card-item1">
+            <div class="debug-param-title title-item1">
+                ① 新號碼進場 (Item 1)
+            </div>
+
+            <div class="debug-slider-group">
+                <div class="debug-slider-header">
+                    <span>進場時間 (秒)：</span>
+                    <b id="h1-dur-val" style="color: #dbee0f; font-size: 22px;">0.50s</b>
+                </div>
+                <input type="range" id="h1-dur" min="0.1" max="1.5" step="0.05" value="0.5" oninput="onParamChange()">
+            </div>
+
+            <div class="debug-slider-group">
+                <div class="debug-slider-header">
+                    <span>回彈/Q彈力度 (1.0為不彈)：</span>
+                    <b id="h1-bounce-val" style="color: #ff9800; font-size: 22px;">1.0x (無回彈)</b>
+                </div>
+                <input type="range" id="h1-bounce" min="0.8" max="2.2" step="0.05" value="1.0" oninput="onParamChange()">
+            </div>
+
+            <div class="debug-slider-group">
+                <div class="debug-slider-header">
+                    <span>進場起跑位移 X (負數為由左滑入)：</span>
+                    <b id="h1-x-val" style="color: #eee; font-size: 20px;">0px</b>
+                </div>
+                <input type="range" id="h1-x" min="-120" max="80" step="5" value="0" oninput="onParamChange()">
+            </div>
+        </div>
+
+        <!-- Item 2 (舊號碼被推擠) -->
+        <div class="debug-param-card card-item2">
+            <div class="debug-param-title title-item2">
+                ② 舊號碼被推動 (Item 2)
+            </div>
+
+            <div class="debug-slider-group">
+                <div class="debug-slider-header">
+                    <span>啟動延遲 (秒，產生跟隨差動感)：</span>
+                    <b id="h2-delay-val" style="color: #64b5f6; font-size: 22px;">0.00s</b>
+                </div>
+                <input type="range" id="h2-delay" min="0" max="0.3" step="0.02" value="0" oninput="onParamChange()">
+            </div>
+
+            <div class="debug-slider-group">
+                <div class="debug-slider-header">
+                    <span>推擠抗力 X (負數產生被撞彈簧感)：</span>
+                    <b id="h2-x-val" style="color: #eee; font-size: 20px;">0px</b>
+                </div>
+                <input type="range" id="h2-x" min="-100" max="0" step="5" value="0" oninput="onParamChange()">
+            </div>
+
+            <div class="debug-slider-group">
+                <div class="debug-slider-header">
+                    <span>舊號碼回彈力度：</span>
+                    <b id="h2-bounce-val" style="color: #ff9800; font-size: 22px;">1.0x (無回彈)</b>
+                </div>
+                <input type="range" id="h2-bounce" min="0.8" max="2.2" step="0.05" value="1.0" oninput="onParamChange()">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 模組化腳本 (支援 file:// 本地離線開啟與靜態伺服器部署) -->
+<script src="js/audio.js"></script>
+<script src="js/scanner.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+<script src="js/ip-anim.js"></script>
+</body>
+</html>

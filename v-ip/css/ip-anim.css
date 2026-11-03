@@ -1,0 +1,210 @@
+/**
+ * 龜記 IP 角色橫幅動畫（僅 v-ip 頁面）
+ * 僅使用 transform / opacity，不動畫 filter 或 box-shadow
+ */
+
+#qms-banner.ip-banner {
+    --ip-safe-left: 248px;
+    --ip-safe-right: 780px;
+}
+
+#qms-banner.ip-banner .ip-characters {
+    position: absolute;
+    inset: 0;
+    z-index: 12;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.standby-mode .ip-characters {
+    opacity: 0;
+    transition: opacity 0.45s ease;
+}
+
+#qms-banner:not(.standby-mode) .ip-characters {
+    opacity: 1;
+    transition: opacity 0.35s ease 0.15s;
+}
+
+.ip-characters img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: bottom center;
+}
+
+/* B 待機輕晃 */
+.ip-bob {
+    position: absolute;
+    bottom: -6px;
+    width: 118px;
+    height: 168px;
+    transform-origin: bottom center;
+    opacity: 0.95;
+}
+
+.ip-bob-a {
+    left: 252px;
+    animation: ipBobA 3.6s ease-in-out infinite;
+}
+
+.ip-bob-b {
+    left: 618px;
+    animation: ipBobB 4.1s ease-in-out infinite;
+    animation-delay: 0.55s;
+}
+
+@keyframes ipBobA {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+@keyframes ipBobB {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+.ip-banner.ip-bob-off .ip-bob {
+    animation: none;
+    opacity: 0;
+}
+
+/* C 叫號慶祝跳躍 */
+.ip-jump {
+    position: absolute;
+    left: 268px;
+    bottom: -4px;
+    width: 132px;
+    height: 190px;
+    transform-origin: bottom center;
+}
+
+.ip-jump.ip-jump-active {
+    animation: ipJumpCelebrate 0.82s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+}
+
+@keyframes ipJumpCelebrate {
+    0% { transform: translateY(0) scale(1, 1); }
+    14% { transform: translateY(5px) scale(1.05, 0.93); }
+    46% { transform: translateY(-52px) rotate(-5deg) scale(0.98, 1.03); }
+    72% { transform: translateY(0) rotate(0deg) scale(1.04, 0.95); }
+    100% { transform: translateY(0) scale(1, 1); }
+}
+
+.ip-banner.ip-jump-off .ip-jump {
+    opacity: 0;
+}
+
+/* A 舉號碼牌 */
+.ip-sign-act {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 360px;
+    height: 100%;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.ip-sign-act.is-visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.ip-sign-slider {
+    position: absolute;
+    left: 0;
+    bottom: -8px;
+    width: 320px;
+    height: 210px;
+    transform: translateX(-115%);
+    transition: transform 0.48s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ip-sign-act.is-in .ip-sign-slider {
+    transform: translateX(8px);
+}
+
+.ip-sign-act.is-out .ip-sign-slider {
+    transform: translateX(-115%);
+    transition-duration: 0.42s;
+    transition-timing-function: cubic-bezier(0.55, 0, 0.75, 0.35);
+}
+
+.ip-sign-char {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 200px;
+    height: 200px;
+}
+
+.ip-sign-board {
+    position: absolute;
+    left: 118px;
+    bottom: 118px;
+    min-width: 108px;
+    padding: 6px 14px 8px;
+    background: #fff;
+    border: 3px solid #1a2a1f;
+    border-radius: 12px;
+    transform: rotate(-4deg);
+    transform-origin: left bottom;
+}
+
+.ip-sign-act.is-in .ip-sign-board {
+    animation: ipSignRaise 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
+
+@keyframes ipSignRaise {
+    0% { transform: translateY(36px) rotate(-10deg); opacity: 0; }
+    100% { transform: translateY(0) rotate(-4deg); opacity: 1; }
+}
+
+.ip-sign-number {
+    display: block;
+    font-family: var(--selected-font, 'Montserrat', sans-serif);
+    font-size: 42px;
+    font-weight: 900;
+    color: #485b28;
+    letter-spacing: 2px;
+    line-height: 1;
+    text-align: center;
+}
+
+.ip-banner.ip-sign-off .ip-sign-act {
+    display: none;
+}
+
+/* 叫號進行中：暫停待機晃動，避免與 A/C 搶戲 */
+.ip-banner.ip-call-busy .ip-bob {
+    animation-play-state: paused;
+    opacity: 0.35;
+}
+
+/* 方案 A：歷史區加寬，角色略往左收 */
+#qms-banner.ip-banner.mode-stack-a {
+    --ip-safe-right: 860px;
+}
+#qms-banner.ip-banner.mode-stack-a .ip-bob-b {
+    left: 580px;
+}
+
+/* 方案 B 多號：主號靠左、六格佔滿右側 — 僅保留左下小跳躍，關閉舉牌與右側晃動 */
+#qms-banner.ip-banner.banner-grid-b.grid-b-active .ip-bob,
+#qms-banner.ip-banner.banner-grid-b.grid-b-active .ip-sign-act {
+    display: none;
+}
+#qms-banner.ip-banner.banner-grid-b.grid-b-active .ip-jump {
+    left: 198px;
+    width: 96px;
+    height: 140px;
+    bottom: 2px;
+}
+
+#qms-banner.ip-banner.banner-grid-b.grid-b-solo:not(.standby-mode) .ip-bob-b {
+    left: 640px;
+}

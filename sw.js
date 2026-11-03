@@ -59,7 +59,7 @@ self.addEventListener('activate', (event) => {
         caches.keys().then((keys) =>
             Promise.all(
                 keys
-                    .filter((key) => key !== CACHE_NAME)
+                    .filter((key) => key.startsWith('guiji-qms-offline-') && key !== CACHE_NAME)
                     .map((key) => caches.delete(key))
             )
         ).then(() => self.clients.claim())
