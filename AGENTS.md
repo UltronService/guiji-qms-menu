@@ -12,6 +12,7 @@
   * Android 機上盒 (WebView) 9:16 直立式滿版 (1080x1920)。
   * 上方 15% (288px) 即時叫號看板 + 下方 85% (1632px) 電子菜單展示。
   * **100% 離線優先 (Offline-First)**：無第三方框架依賴（Vanilla JS/CSS）、PWA Service Worker 本機快取、純 Web Audio API 雙音合成「Ding-Dong」、本地字體與影片。
+* **UI／視覺設計規範**：以 Cursor 技能 `.cursor/skills/guiji-brand` 為準（優先於其他設計技能）。
 
 ---
 
