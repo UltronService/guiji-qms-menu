@@ -62,3 +62,7 @@
 ## 📦 版本
 
 目前版本：**v0.4 (Refactored Modular Architecture)**
+
+### IP 角色版 (`v-ip/`)
+
+門市簽核用獨立 URL，不影響根站預覽。說明見 [`v-ip/README.md`](v-ip/README.md)。
