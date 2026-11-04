@@ -126,12 +126,12 @@ const QMSUI = (() => {
     function showNoImage(imgElement) {
         if (!imgElement) return;
         imgElement.style.display = 'none';
+        const parent = imgElement.parentNode;
+        if (!parent || parent.querySelector('.no-image-text')) return;
         const div = document.createElement('div');
         div.className = 'no-image-text';
         div.textContent = '請確認 assets/menu.jpg 檔案';
-        if (imgElement.parentNode) {
-            imgElement.parentNode.appendChild(div);
-        }
+        parent.appendChild(div);
     }
 
     return {

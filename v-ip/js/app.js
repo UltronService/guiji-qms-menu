@@ -14,8 +14,6 @@ const QMSApp = (() => {
         currentChar: null
     };
 
-    let testCounter = 320;
-
     function getMaxHistory() {
         return 6;
     }

@@ -84,20 +84,10 @@ const QMSAudio = (() => {
     }
 
     /**
-     * 切換靜音狀態並更新按鈕 UI
+     * 切換靜音（v-ip 無面板按鈕；供主控台或後續快捷鍵使用）
      */
     function toggleMute() {
         isMuted = !isMuted;
-        const btn = document.getElementById('mute-btn');
-        if (btn) {
-            if (isMuted) {
-                btn.textContent = '🔇 靜音: 開';
-                btn.classList.add('muted');
-            } else {
-                btn.textContent = '🔊 聲音: 開';
-                btn.classList.remove('muted');
-            }
-        }
         if (isMuted && 'speechSynthesis' in window) {
             window.speechSynthesis.cancel();
         }

@@ -8,6 +8,18 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="../favicon.ico" sizes="48x48">
     <link rel="stylesheet" href="css/style.css">
+    <script>
+    function showNoImage(img) {
+        if (!img) return;
+        img.style.display = 'none';
+        var parent = img.parentNode;
+        if (!parent || parent.querySelector('.no-image-text')) return;
+        var div = document.createElement('div');
+        div.className = 'no-image-text';
+        div.textContent = '請確認 assets/menu.jpg 檔案';
+        parent.appendChild(div);
+    }
+    </script>
 </head>
 <body>
 
