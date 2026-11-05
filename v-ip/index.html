@@ -24,7 +24,7 @@
 <body>
 
 <div id="viewport-container">
-    <div id="qms-banner" class="standby-mode">
+    <div id="qms-banner" class="standby-mode" ondblclick="toggleDebugPanel()">
         <div class="logo-area" id="banner-logo">
             <img src="../assets/logo2.svg" alt="龜記 Guiji 品牌標誌">
         </div>
@@ -42,6 +42,167 @@
 
     <div id="menu-area">
         <img src="../assets/menu.jpg" alt="電子菜單" onerror="showNoImage(this)">
+    </div>
+
+    <div id="debug-panel">
+        <div class="debug-header">
+            <h3>🎛️ 動態調校面板</h3>
+            <span id="offline-status-badge" class="debug-hint" style="color: #8bc34a;">🛡️ 100% 離線模式就緒 · 按 T 關閉</span>
+        </div>
+
+        <div class="debug-section">
+            <div class="debug-control-row">
+                <span class="debug-label">🔤 數字字體：</span>
+                <select id="font-selector" onchange="changeFont()">
+                    <option value="'Greycliff CF', sans-serif">Greycliff CF (有浮水印)</option>
+                    <option value="'Montserrat', sans-serif" selected>Montserrat (開源免費)</option>
+                    <option value="'Poppins', sans-serif">Poppins (開源免費)</option>
+                    <option value="'Nunito', sans-serif">Nunito (開源圓潤)</option>
+                    <option value="Arial, sans-serif">系統預設 (Arial)</option>
+                </select>
+            </div>
+
+            <div class="debug-control-box highlight-green">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span class="debug-label accent">📺 歷史顯示模式：</span>
+                    <select id="display-mode-selector" onchange="changeDisplayMode(this.value)" style="max-width: 280px;">
+                        <option value="classic" selected>經典（1 主 + 2 歷史 · 原版）</option>
+                        <option value="stack-a">方案 A · 六筆直列</option>
+                        <option value="grid-b">方案 B · 六格網格</option>
+                    </select>
+                </div>
+                <div class="debug-subtext">
+                    IP 版固定 2×3 六格；此選項僅同步根版預覽偏好
+                </div>
+            </div>
+
+            <div id="layout-selector-row" class="debug-control-row">
+                <span class="debug-label">📑 歷史號碼排版：</span>
+                <select id="layout-selector" onchange="changeLayout(this.value)">
+                    <option value="horizontal" selected>橫向 (左新 右舊)</option>
+                    <option value="vertical">直向 (下新 上舊)</option>
+                </select>
+            </div>
+
+            <div id="grid-b-layout-row" class="debug-control-row">
+                <span class="debug-label">⊞ 方案 B 六格排版：</span>
+                <select id="grid-b-layout-selector" onchange="changeGridBLayout(this.value)">
+                    <option value="b1" selected>B1 上排新 / 下排舊（左→右）· 預設</option>
+                    <option value="b2">B2 下排新 / 上排舊</option>
+                    <option value="b3">B3 上→下、左→右填格</option>
+                    <option value="b4">B4 右上最新</option>
+                </select>
+            </div>
+
+            <div class="debug-control-box">
+                <div class="debug-slider-header">
+                    <span class="debug-label">🟩 橫幅底色透明度：</span>
+                    <b id="opacity-val" style="color: #dbee0f; font-size: 20px;">1.00</b>
+                </div>
+                <input type="range" id="banner-opacity-slider" min="0" max="1" step="0.05" value="1" oninput="changeBannerOpacity()">
+            </div>
+
+            <div class="debug-control-row">
+                <span class="debug-label">⌨️ 手動單號：</span>
+                <input type="text" id="manual-input" placeholder="輸入號碼 (如 A01, 088)">
+                <button type="button" onclick="submitManual()" style="margin-left: 8px;">叫號</button>
+            </div>
+
+            <div class="debug-btn-row">
+                <button type="button" class="btn-primary-test" onclick="testNextNumber()">
+                    ▶ 立即測試 (下一號)
+                </button>
+                <button type="button" id="demo-btn" class="btn-clear" onclick="toggleDemoMode()">
+                    ⏱ Demo: 關
+                </button>
+                <button type="button" class="btn-clear" onclick="clearHistory()">
+                    ↺ 清空歷史
+                </button>
+            </div>
+
+            <div class="debug-btn-row">
+                <button type="button" class="btn-quick" onclick="processScan('321')">321</button>
+                <button type="button" class="btn-quick" onclick="processScan('322')">322</button>
+                <button type="button" class="btn-quick" onclick="processScan('323')">323</button>
+                <button type="button" class="btn-quick" onclick="processScan('A01')">A01</button>
+                <button type="button" class="btn-quick" onclick="processScan('088')">088</button>
+                <button type="button" id="mute-btn" class="btn-mute" onclick="toggleMute()">🔊 聲音: 開</button>
+            </div>
+        </div>
+
+        <div class="debug-presets">
+            <div class="debug-presets-title">⚡ 快速套用推薦風格：</div>
+            <div class="debug-presets-grid">
+                <button type="button" class="preset-btn preset-clean" onclick="applyPreset('clean')">
+                    🟢 <b>俐落標準</b><br><span>0.4s 無回彈、乾淨</span>
+                </button>
+                <button type="button" class="preset-btn preset-smooth" onclick="applyPreset('smooth')">
+                    🌊 <b>極致絲滑</b><br><span>0.6s 蘋果風優雅緩出</span>
+                </button>
+                <button type="button" class="preset-btn preset-bounce" onclick="applyPreset('bounce')">
+                    🎾 <b>輕巧 Q 彈</b><br><span>微衝過頭、活潑彈性</span>
+                </button>
+                <button type="button" class="preset-btn preset-stagger" onclick="applyPreset('stagger')">
+                    💥 <b>火車連鎖差動</b><br><span>舊號碼帶有抗力與延遲</span>
+                </button>
+            </div>
+        </div>
+
+        <hr class="debug-divider">
+
+        <div class="debug-param-card card-item1">
+            <div class="debug-param-title title-item1">
+                ① 新號碼進場 (Item 1)
+            </div>
+            <div class="debug-slider-group">
+                <div class="debug-slider-header">
+                    <span>進場時間 (秒)：</span>
+                    <b id="h1-dur-val" style="color: #dbee0f; font-size: 22px;">0.50s</b>
+                </div>
+                <input type="range" id="h1-dur" min="0.1" max="1.5" step="0.05" value="0.5" oninput="onParamChange()">
+            </div>
+            <div class="debug-slider-group">
+                <div class="debug-slider-header">
+                    <span>回彈/Q彈力度 (1.0為不彈)：</span>
+                    <b id="h1-bounce-val" style="color: #ff9800; font-size: 22px;">1.0x (無回彈)</b>
+                </div>
+                <input type="range" id="h1-bounce" min="0.8" max="2.2" step="0.05" value="1.0" oninput="onParamChange()">
+            </div>
+            <div class="debug-slider-group">
+                <div class="debug-slider-header">
+                    <span>進場起跑位移 X (負數為由左滑入)：</span>
+                    <b id="h1-x-val" style="color: #eee; font-size: 20px;">0px</b>
+                </div>
+                <input type="range" id="h1-x" min="-120" max="80" step="5" value="0" oninput="onParamChange()">
+            </div>
+        </div>
+
+        <div class="debug-param-card card-item2">
+            <div class="debug-param-title title-item2">
+                ② 舊號碼被推動 (Item 2)
+            </div>
+            <div class="debug-slider-group">
+                <div class="debug-slider-header">
+                    <span>啟動延遲 (秒，產生跟隨差動感)：</span>
+                    <b id="h2-delay-val" style="color: #64b5f6; font-size: 22px;">0.00s</b>
+                </div>
+                <input type="range" id="h2-delay" min="0" max="0.3" step="0.02" value="0" oninput="onParamChange()">
+            </div>
+            <div class="debug-slider-group">
+                <div class="debug-slider-header">
+                    <span>推擠抗力 X (負數產生被撞彈簧感)：</span>
+                    <b id="h2-x-val" style="color: #eee; font-size: 20px;">0px</b>
+                </div>
+                <input type="range" id="h2-x" min="-100" max="0" step="5" value="0" oninput="onParamChange()">
+            </div>
+            <div class="debug-slider-group">
+                <div class="debug-slider-header">
+                    <span>舊號碼回彈力度：</span>
+                    <b id="h2-bounce-val" style="color: #ff9800; font-size: 22px;">1.0x (無回彈)</b>
+                </div>
+                <input type="range" id="h2-bounce" min="0.8" max="2.2" step="0.05" value="1.0" oninput="onParamChange()">
+            </div>
+        </div>
     </div>
 </div>
 

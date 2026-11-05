@@ -1,6 +1,34 @@
 /* 龜記 QMS — IP 角色版 (v-ip/) · 1080×1920 · 100% 離線 Vanilla CSS */
 
 @font-face {
+    font-family: 'Greycliff CF';
+    src: url('../../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-regular.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Greycliff CF';
+    src: url('../../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-bold.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Greycliff CF';
+    src: url('../../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-extrabold.otf') format('opentype');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Greycliff CF';
+    src: url('../../assets/fonts/Demo_Fonts/Fontspring-DEMO-greycliffcf-heavy.otf') format('opentype');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
     font-family: 'Montserrat';
     src: url('../../assets/fonts/montserrat-700.woff2') format('woff2');
     font-weight: 700;
@@ -22,11 +50,63 @@
     font-display: swap;
 }
 
+@font-face {
+    font-family: 'Poppins';
+    src: url('../../assets/fonts/poppins-700.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Poppins';
+    src: url('../../assets/fonts/poppins-800.woff2') format('woff2');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Poppins';
+    src: url('../../assets/fonts/poppins-900.woff2') format('woff2');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Nunito';
+    src: url('../../assets/fonts/nunito-700.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Nunito';
+    src: url('../../assets/fonts/nunito-800.woff2') format('woff2');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Nunito';
+    src: url('../../assets/fonts/nunito-900.woff2') format('woff2');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
 :root {
     --selected-font: 'Montserrat', sans-serif;
+    --banner-opacity: 1;
     --banner-bg: #f6f5ef;
     --brand-dark-green: #474e25;
     --brand-history-color: #474e25;
+    --hist1-dur: 0.5s;
+    --hist1-ease: ease-out;
+    --hist1-x: 0px;
+    --hist2-dur: 0.5s;
+    --hist2-delay: 0s;
+    --hist2-ease: ease-out;
+    --hist2-x: 0px;
 }
 
 * {
@@ -62,7 +142,7 @@ html, body {
     left: 0;
     width: 1080px;
     height: 288px;
-    background-color: var(--banner-bg);
+    background-color: rgba(246, 245, 239, var(--banner-opacity));
     border-bottom: 2px solid rgba(71, 78, 37, 0.15);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
     z-index: 10;
@@ -271,20 +351,20 @@ html, body {
 @keyframes histPopIn {
     0% {
         opacity: 0;
-        transform: scale(0.7);
+        transform: translateX(var(--hist1-x, 0px)) scale(0.7);
     }
     60% {
-        transform: scale(1.08);
+        transform: translateX(0) scale(1.08);
         opacity: 0.92;
     }
     100% {
         opacity: 0.92;
-        transform: scale(1);
+        transform: translateX(0) scale(1);
     }
 }
 
 .history-item.item-enter {
-    animation: histPopIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards;
+    animation: histPopIn var(--hist1-dur, 0.35s) var(--hist1-ease, cubic-bezier(0.175, 0.885, 0.32, 1.25)) forwards;
 }
 
 #menu-area {
@@ -308,4 +388,260 @@ html, body {
     text-align: center;
     line-height: 1632px;
     font-size: 48px;
+}
+
+#debug-panel {
+    position: absolute;
+    top: 300px;
+    right: 20px;
+    width: 580px;
+    max-height: 82vh;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.88);
+    border: 2px solid #fff;
+    border-radius: 10px;
+    padding: 20px;
+    color: #fff;
+    z-index: 100;
+    display: none;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    font-family: sans-serif;
+}
+
+.debug-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #555;
+    padding-bottom: 8px;
+}
+
+.debug-header h3 {
+    margin: 0;
+    font-size: 26px;
+    color: #dbee0f;
+}
+
+.debug-hint {
+    font-size: 16px;
+    color: #888;
+}
+
+.debug-section {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.debug-control-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.debug-control-box {
+    margin-bottom: 12px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.debug-control-box.highlight-green {
+    background: rgba(72, 91, 40, 0.35);
+    border: 1px solid #485b28;
+}
+
+.debug-label {
+    font-size: 18px;
+    color: #fff;
+    font-weight: bold;
+}
+
+.debug-label.accent {
+    color: #dbee0f;
+}
+
+.debug-subtext {
+    font-size: 13px;
+    color: #aaa;
+    line-height: 1.4;
+}
+
+.debug-subtext code {
+    color: #ccc;
+}
+
+#debug-panel input[type="text"],
+#debug-panel select {
+    font-size: 17px;
+    padding: 6px 10px;
+    background: #333;
+    color: #fff;
+    border: 1px solid #666;
+    border-radius: 4px;
+    flex-grow: 1;
+    margin-left: 10px;
+}
+
+#debug-panel input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+}
+
+#debug-panel button {
+    padding: 10px 15px;
+    font-size: 18px;
+    cursor: pointer;
+    background: #485b28;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    transition: background 0.2s, opacity 0.2s;
+}
+
+#debug-panel button:hover {
+    background: #5a7232;
+}
+
+.debug-btn-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.debug-btn-row:last-child {
+    margin-bottom: 0;
+}
+
+#debug-panel button.btn-primary-test {
+    flex: 2;
+    background: #dbee0f;
+    color: #000;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+#debug-panel button.btn-primary-test:hover {
+    background: #c8da0d;
+}
+
+#debug-panel button.btn-clear {
+    flex: 1;
+    background: #444;
+    color: #fff;
+    font-size: 18px;
+    border-radius: 6px;
+}
+
+#debug-panel button.btn-clear:hover {
+    background: #555;
+}
+
+#debug-panel button.btn-quick {
+    flex: 1;
+    padding: 6px;
+    font-size: 16px;
+}
+
+#debug-panel button.btn-mute {
+    flex: 1.2;
+    padding: 6px;
+    font-size: 16px;
+}
+
+#mute-btn.muted {
+    background: #a00;
+}
+
+#demo-btn.active {
+    background: #dbee0f;
+    color: #000;
+    font-weight: bold;
+}
+
+.debug-presets {
+    margin-bottom: 18px;
+}
+
+.debug-presets-title {
+    font-size: 18px;
+    color: #aaa;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.debug-presets-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+#debug-panel button.preset-btn {
+    font-size: 18px;
+    padding: 8px;
+    text-align: left;
+}
+
+#debug-panel button.preset-btn span {
+    font-size: 13px;
+    color: #aaa;
+}
+
+#debug-panel button.preset-clean { background: #2a3a1e; }
+#debug-panel button.preset-smooth { background: #1e333a; }
+#debug-panel button.preset-bounce { background: #3a2e1e; }
+#debug-panel button.preset-stagger { background: #3a1e35; }
+
+.debug-divider {
+    border-color: #444;
+    margin: 15px 0;
+}
+
+.debug-param-card {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 15px;
+}
+
+.debug-param-card.card-item1 {
+    border: 1px solid #485b28;
+}
+
+.debug-param-card.card-item2 {
+    border: 1px solid #334;
+    margin-bottom: 0;
+}
+
+.debug-param-title {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.debug-param-title.title-item1 { color: #dbee0f; }
+.debug-param-title.title-item2 { color: #64b5f6; }
+
+.debug-slider-group {
+    margin-bottom: 12px;
+}
+
+.debug-slider-group:last-child {
+    margin-bottom: 4px;
+}
+
+.debug-slider-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+    color: #eee;
+    margin-bottom: 4px;
 }

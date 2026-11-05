@@ -88,6 +88,16 @@ const QMSAudio = (() => {
      */
     function toggleMute() {
         isMuted = !isMuted;
+        const btn = document.getElementById('mute-btn');
+        if (btn) {
+            if (isMuted) {
+                btn.textContent = '🔇 靜音: 開';
+                btn.classList.add('muted');
+            } else {
+                btn.textContent = '🔊 聲音: 開';
+                btn.classList.remove('muted');
+            }
+        }
         if (isMuted && 'speechSynthesis' in window) {
             window.speechSynthesis.cancel();
         }
