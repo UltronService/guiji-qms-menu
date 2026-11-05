@@ -1,0 +1,9 @@
+{
+  "name": "龜記叫號看板（IP 角色版）",
+  "short_name": "龜記 QMS IP",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#474e25"
+}

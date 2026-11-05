@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#474e25">
+    <title>龜記叫號取餐系統與電子菜單看板（IP 角色版）</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="../favicon.ico" sizes="48x48">
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+    function showNoImage(img) {
+        if (!img) return;
+        img.style.display = 'none';
+        var parent = img.parentNode;
+        if (!parent || parent.querySelector('.no-image-text')) return;
+        var div = document.createElement('div');
+        div.className = 'no-image-text';
+        div.textContent = '請確認 assets/menu.jpg 檔案';
+        parent.appendChild(div);
+    }
+    </script>
+</head>
+<body>
+
+<div id="viewport-container">
+    <div id="qms-banner" class="standby-mode">
+        <div class="logo-area" id="banner-logo">
+            <img src="../assets/logo2.svg" alt="龜記 Guiji 品牌標誌">
+        </div>
+
+        <div class="main-number-area">
+            <div id="main-number"></div>
+        </div>
+
+        <div class="character-area" id="character-area">
+            <img id="character-img" class="character-img" src="" alt="龜記 IP 角色">
+        </div>
+
+        <div class="history-area" id="history-area"></div>
+    </div>
+
+    <div id="menu-area">
+        <img src="../assets/menu.jpg" alt="電子菜單" onerror="showNoImage(this)">
+    </div>
+</div>
+
+<script src="js/audio.js"></script>
+<script src="js/scanner.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
