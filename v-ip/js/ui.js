@@ -221,10 +221,20 @@ const QMSUI = (() => {
         }
     }
 
+    function isDebugPanelVisible(panel) {
+        return window.getComputedStyle(panel).display !== 'none';
+    }
+
+    function showDebugPanelOnLoad() {
+        const panel = document.getElementById('debug-panel');
+        if (!panel) return;
+        panel.style.display = 'block';
+    }
+
     function toggleDebugPanel() {
         const panel = document.getElementById('debug-panel');
         if (!panel) return;
-        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        panel.style.display = isDebugPanelVisible(panel) ? 'none' : 'block';
     }
 
     function syncAnimParamsFromDOM(animConfig) {
@@ -304,6 +314,7 @@ const QMSUI = (() => {
         restoreAppearancePrefs,
         syncLayoutSelectorUI,
         updateOfflineBadge,
+        showDebugPanelOnLoad,
         toggleDebugPanel,
         syncAnimParamsFromDOM,
         applyPresetValues

@@ -300,6 +300,7 @@ const QMSApp = (() => {
         window.addEventListener('offline', () => QMSUI.updateOfflineBadge(swReady));
 
         QMSUI.restoreAppearancePrefs();
+        QMSUI.showDebugPanelOnLoad();
         loadState();
         onParamChange();
 
