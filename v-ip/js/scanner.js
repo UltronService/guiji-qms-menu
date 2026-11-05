@@ -1,5 +1,5 @@
 /**
- * USB 掃碼槍 (HID) 與鍵盤緩衝監聽 — v-ip 版（無調校面板快捷鍵）
+ * USB 掃碼槍 (HID 鍵盤連發模式) 與全域快捷鍵監聽 — v-ip 版
  */
 
 const QMSScanner = (() => {
@@ -7,6 +7,7 @@ const QMSScanner = (() => {
     let keyBuffer = '';
     let keyTimer = null;
     let scanCallback = null;
+    let debugToggleCallback = null;
 
     function clearBuffer() {
         keyBuffer = '';
@@ -18,7 +19,22 @@ const QMSScanner = (() => {
 
     function handleKeyDown(e) {
         const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+
         if (tag === 'input' || tag === 'select' || tag === 'textarea') {
+            if (e.target.id === 'manual-input' && e.key === 'Enter') {
+                e.preventDefault();
+                if (typeof window.submitManual === 'function') {
+                    window.submitManual();
+                }
+            }
+            return;
+        }
+
+        if (e.key.toLowerCase() === 't') {
+            clearBuffer();
+            if (typeof debugToggleCallback === 'function') {
+                debugToggleCallback();
+            }
             return;
         }
 
@@ -45,6 +61,7 @@ const QMSScanner = (() => {
 
     function init(options = {}) {
         scanCallback = options.onScan || null;
+        debugToggleCallback = options.onToggleDebug || null;
         window.addEventListener('keydown', handleKeyDown);
     }
 
