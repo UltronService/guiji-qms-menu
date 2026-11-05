@@ -403,7 +403,7 @@ html, body {
     padding: 20px;
     color: #fff;
     z-index: 100;
-    display: none;
+    display: block;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
     font-family: sans-serif;
 }
