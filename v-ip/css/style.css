@@ -191,14 +191,16 @@ html, body {
 
 .main-number-area {
     position: absolute;
-    left: 60px;
+    left: 495px;
     top: 50%;
-    transform: translateY(-50%);
+    transform: translate(-50%, -50%);
     display: flex;
     align-items: center;
+    justify-content: center;
+    width: 264px;
+    max-width: 264px;
     z-index: 20;
     white-space: nowrap;
-    max-width: 264px;
 }
 
 #main-number {
@@ -232,10 +234,10 @@ html, body {
 
 .character-area {
     position: absolute;
-    left: 495px;
+    left: 60px;
     top: 50%;
-    transform: translate(-50%, -50%);
-    width: 116px;
+    transform: translateY(-50%);
+    width: 264px;
     height: 224px;
     display: flex;
     justify-content: center;
