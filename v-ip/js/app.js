@@ -118,7 +118,7 @@ const QMSApp = (() => {
     }
 
     function updateUI(withEffects, isFirstCall = false) {
-        QMSUI.updateUI(state, withEffects, triggerEffects, isFirstCall);
+        QMSUI.updateUI(state, animConfig, withEffects, triggerEffects, isFirstCall);
     }
 
     function normalizeNumber(raw) {

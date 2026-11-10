@@ -60,24 +60,135 @@ const QMSUI = (() => {
         }, 180);
     }
 
-    function renderHistory(state, withEffects) {
+    const MAX_HISTORY_SLOTS = 6;
+
+    /** 與根目錄 js/ui.js 相同（v-ip 固定 2×3 = grid-b） */
+    function getGridBPlacement(index, layout) {
+        if (layout === 'b2') {
+            return index < 3
+                ? { row: 2, col: index + 1 }
+                : { row: 1, col: index - 2 };
+        }
+        if (layout === 'b4') {
+            return index < 3
+                ? { row: 1, col: 3 - index }
+                : { row: 2, col: 3 - (index - 3) };
+        }
+        return index < 3
+            ? { row: 1, col: index + 1 }
+            : { row: 2, col: index - 2 };
+    }
+
+    function applyHistoryItemMeta(el, index, useGrid, gridBLayout) {
+        el.setAttribute('data-hist-index', String(index));
+        if (useGrid) {
+            const place = getGridBPlacement(index, gridBLayout);
+            el.style.gridRow = String(place.row);
+            el.style.gridColumn = String(place.col);
+        } else {
+            el.style.gridRow = '';
+            el.style.gridColumn = '';
+        }
+    }
+
+    /** v-ip 專用：保留 2×3 空格，不參與原版差動畫 */
+    function ensureEmptyGridSlots(historyArea, state, gridBLayout) {
+        for (let i = 0; i < MAX_HISTORY_SLOTS; i++) {
+            if (state.historyList[i]) continue;
+            let empty = historyArea.querySelector(
+                `.history-item.empty-slot[data-hist-index="${i}"]`
+            );
+            if (!empty) {
+                empty = document.createElement('div');
+                empty.className = 'history-item empty-slot';
+                applyHistoryItemMeta(empty, i, true, gridBLayout);
+                historyArea.appendChild(empty);
+            }
+        }
+    }
+
+    /** 與根目錄 js/ui.js renderHistory 相同，固定 useGrid + 僅補空格 */
+    function renderHistory(state, animConfig, withEffects) {
         const historyArea = document.getElementById('history-area');
         if (!historyArea) return;
 
-        historyArea.innerHTML = '';
-        for (let i = 0; i < 6; i++) {
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'history-item';
-            const val = state.historyList[i] || '';
-            itemDiv.textContent = val;
+        const useGrid = true;
+        const useShiftAnimation = true;
+        const gridBLayout = state.gridBLayout || 'b1';
 
-            if (!val) {
-                itemDiv.classList.add('empty-slot');
-            } else if (withEffects && i === 0) {
-                itemDiv.classList.add('item-enter');
-            }
-            historyArea.appendChild(itemDiv);
+        if (!withEffects) {
+            historyArea.innerHTML = '';
+            state.historyList.forEach((num, index) => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.textContent = num;
+                applyHistoryItemMeta(div, index, useGrid, gridBLayout);
+                historyArea.appendChild(div);
+            });
+            ensureEmptyGridSlots(historyArea, state, gridBLayout);
+            return;
         }
+
+        historyArea.querySelectorAll('.history-item.empty-slot').forEach((node) => {
+            if (node.parentNode) node.parentNode.removeChild(node);
+        });
+
+        const currentNodes = Array.from(
+            historyArea.querySelectorAll('.history-item:not(.item-exit)')
+        );
+
+        currentNodes.forEach((node) => {
+            if (!state.historyList.includes(node.textContent)) {
+                node.classList.add('item-exit');
+                void node.offsetWidth;
+                node.classList.add('item-exit-active');
+                setTimeout(() => {
+                    if (node.parentNode) node.parentNode.removeChild(node);
+                }, animConfig.h1Dur * 1000 + 50);
+            }
+        });
+
+        state.historyList.forEach((num, index) => {
+            const activeNodes = Array.from(
+                historyArea.querySelectorAll('.history-item:not(.item-exit)')
+            );
+            let el = activeNodes.find((n) => n.textContent === num);
+            const refNode = activeNodes[index] || null;
+
+            if (!el) {
+                el = document.createElement('div');
+                el.className = 'history-item item-enter';
+                el.textContent = num;
+                applyHistoryItemMeta(el, index, useGrid, gridBLayout);
+                historyArea.insertBefore(el, refNode);
+                void el.offsetWidth;
+                el.classList.add('item-enter-active');
+
+                setTimeout(() => {
+                    el.classList.remove('item-enter', 'item-enter-active');
+                }, animConfig.h1Dur * 1000 + 50);
+            } else {
+                applyHistoryItemMeta(el, index, useGrid, gridBLayout);
+                historyArea.insertBefore(el, refNode);
+
+                if (useShiftAnimation) {
+                    el.classList.remove('item-shift', 'item-shift-active');
+                    el.classList.add('item-shift');
+                    void el.offsetWidth;
+                    if (animConfig.h2Delay > 0) {
+                        el.style.transitionDelay = animConfig.h2Delay + 's';
+                    }
+                    el.classList.add('item-shift-active');
+
+                    setTimeout(() => {
+                        el.classList.remove('item-shift', 'item-shift-active');
+                        el.style.transitionDelay = '';
+                    }, (animConfig.h2Dur + animConfig.h2Delay) * 1000 + 50);
+                }
+            }
+        });
+
+        ensureEmptyGridSlots(historyArea, state, gridBLayout);
     }
 
     function animateMainNumber() {
@@ -88,20 +199,31 @@ const QMSUI = (() => {
         mainEl.classList.add('animate-call');
     }
 
-    function updateUI(state, withEffects, onTriggerEffects, isFirstCall = false) {
+    function updateUI(state, animConfig, withEffects, onTriggerEffects, isFirstCall = false) {
         const banner = document.getElementById('qms-banner');
         const mainEl = document.getElementById('main-number');
         const isStandby = state.currentMain === '' || state.currentMain === null;
 
         if (isStandby) {
-            if (banner) banner.classList.add('standby-mode');
+            if (banner) {
+                banner.classList.add('standby-mode');
+                banner.classList.remove('main-reveal-pending');
+            }
             if (mainEl) mainEl.textContent = '';
             renderCharacter(null, false);
-            renderHistory(state, false);
+            renderHistory(state, animConfig, false);
             return;
         }
 
-        if (banner) banner.classList.remove('standby-mode');
+        if (banner) {
+            banner.classList.remove('standby-mode');
+            if (isFirstCall && withEffects) {
+                banner.classList.add('main-reveal-pending');
+                window.setTimeout(() => {
+                    banner.classList.remove('main-reveal-pending');
+                }, 480);
+            }
+        }
 
         if (mainEl) {
             mainEl.textContent = state.currentMain;
@@ -116,22 +238,11 @@ const QMSUI = (() => {
             renderCharacter(state.currentChar, isFirstCall);
         }
 
-        renderHistory(state, withEffects);
+        renderHistory(state, animConfig, withEffects);
 
         if (withEffects && typeof onTriggerEffects === 'function') {
             onTriggerEffects(state.currentMain);
         }
-    }
-
-    function showNoImage(imgElement) {
-        if (!imgElement) return;
-        imgElement.style.display = 'none';
-        const parent = imgElement.parentNode;
-        if (!parent || parent.querySelector('.no-image-text')) return;
-        const div = document.createElement('div');
-        div.className = 'no-image-text';
-        div.textContent = '請確認 assets/menu.jpg 檔案';
-        parent.appendChild(div);
     }
 
     function showNoImage(imgElement) {

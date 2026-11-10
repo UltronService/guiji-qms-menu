@@ -2,7 +2,7 @@
  * v-ip Service Worker — 離線預快取（含共用根目錄 assets）
  */
 
-const CACHE_NAME = 'guiji-qms-vip-offline-v4';
+const CACHE_NAME = 'guiji-qms-vip-offline-v5';
 
 const PRECACHE_ASSETS = [
     './',
