@@ -181,6 +181,13 @@ html, body {
     transform: translate(-50%, -50%) scale(0.75);
 }
 
+#qms-banner.main-reveal-pending .main-number-area,
+#qms-banner.main-reveal-pending .character-area {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none;
+}
+
 .standby-mode .main-number-area,
 .standby-mode .character-area,
 .standby-mode .history-area {
@@ -215,11 +222,11 @@ html, body {
 
 @keyframes popIn {
     0% {
-        transform: scale(0.6);
+        transform: scale(0.5);
         opacity: 0;
     }
     60% {
-        transform: scale(1.08);
+        transform: scale(1.1);
         opacity: 1;
     }
     100% {
@@ -342,6 +349,7 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
+    will-change: transform, opacity;
 }
 
 .history-item.empty-slot {
@@ -350,23 +358,39 @@ html, body {
     pointer-events: none;
 }
 
-@keyframes histPopIn {
-    0% {
-        opacity: 0;
-        transform: translateX(var(--hist1-x, 0px)) scale(0.7);
-    }
-    60% {
-        transform: translateX(0) scale(1.08);
-        opacity: 0.92;
-    }
-    100% {
-        opacity: 0.92;
-        transform: translateX(0) scale(1);
-    }
+/* 以下動畫規則與根目錄 css/style.css 相同（GPU transform 進場／推移） */
+.history-item.item-enter {
+    transform: translateX(calc(-60px + var(--hist1-x)));
+    opacity: 0;
+    transition: transform var(--hist1-dur) var(--hist1-ease),
+                opacity var(--hist1-dur) var(--hist1-ease);
+}
+.history-item.item-enter.item-enter-active {
+    transform: translateX(0);
+    opacity: 0.92;
 }
 
-.history-item.item-enter {
-    animation: histPopIn var(--hist1-dur, 0.35s) var(--hist1-ease, cubic-bezier(0.175, 0.885, 0.32, 1.25)) forwards;
+.history-item.item-shift {
+    transform: translateX(calc(-100% - 20px + var(--hist2-x)));
+    transition: transform var(--hist2-dur) var(--hist2-ease);
+}
+.history-item.item-shift.item-shift-active {
+    transform: translateX(0);
+}
+
+/* 方案 B 六格退場：與原版 mode-grid-b 相同 */
+.history-area.mode-grid-b .history-item.item-exit {
+    position: relative !important;
+    right: auto !important;
+    bottom: auto !important;
+    opacity: 0.92;
+    transform: scale(1);
+    transition: opacity 0.35s ease-out, transform 0.35s ease-out !important;
+    pointer-events: none;
+}
+.history-area.mode-grid-b .history-item.item-exit.item-exit-active {
+    opacity: 0 !important;
+    transform: scale(0.75) !important;
 }
 
 #menu-area {
