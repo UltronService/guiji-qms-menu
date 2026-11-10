@@ -11,6 +11,7 @@ const QMSUI = (() => {
     };
 
     const MOTION_CLASS = 'char-motion-6';
+    const MAIN_REVEAL_PENDING_MS = 480;
     let charSwitchTimer = null;
 
     function preloadCharacters() {
@@ -221,7 +222,7 @@ const QMSUI = (() => {
                 banner.classList.add('main-reveal-pending');
                 window.setTimeout(() => {
                     banner.classList.remove('main-reveal-pending');
-                }, 480);
+                }, MAIN_REVEAL_PENDING_MS);
             }
         }
 
@@ -241,7 +242,13 @@ const QMSUI = (() => {
         renderHistory(state, animConfig, withEffects);
 
         if (withEffects && typeof onTriggerEffects === 'function') {
-            onTriggerEffects(state.currentMain);
+            if (isFirstCall) {
+                window.setTimeout(() => {
+                    onTriggerEffects(state.currentMain);
+                }, MAIN_REVEAL_PENDING_MS);
+            } else {
+                onTriggerEffects(state.currentMain);
+            }
         }
     }
 
