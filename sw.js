@@ -7,7 +7,7 @@
  * ==========================================================================
  */
 
-const CACHE_NAME = 'guiji-qms-offline-v4';
+const CACHE_NAME = 'guiji-qms-offline-v5';
 
 const PRECACHE_ASSETS = [
     './',
@@ -69,6 +69,22 @@ self.addEventListener('activate', (event) => {
 /**
  * 處理 <video> 的 Range 請求，確保離線快取中的 .webm 影片在 WebView 重開機後仍可順暢播放
  */
+/**
+ * 子應用路徑（如 v-ip）由各自 Service Worker 負責；根 SW 不得攔截或 fallback 成根目錄 index.html。
+ */
+function isExcludedSubAppPath(pathname) {
+    return /\/v-ip(?:\/|$)/.test(pathname);
+}
+
+function shouldUseRootNavigateFallback(request) {
+    if (request.mode !== 'navigate') return false;
+    try {
+        return !isExcludedSubAppPath(new URL(request.url).pathname);
+    } catch {
+        return true;
+    }
+}
+
 async function handleRangeRequest(request, cachedResponse) {
     const arrayBuffer = await cachedResponse.arrayBuffer();
     const total = arrayBuffer.byteLength;
@@ -109,14 +125,26 @@ self.addEventListener('fetch', (event) => {
     const { request } = event;
     if (request.method !== 'GET') return;
 
+    let requestPathname = '';
+    try {
+        requestPathname = new URL(request.url).pathname;
+    } catch {
+        return;
+    }
+    if (isExcludedSubAppPath(requestPathname)) {
+        return;
+    }
+
     event.respondWith(
         (async () => {
             const cache = await caches.open(CACHE_NAME);
 
-            // 忽略網址查詢參數 (?mode=a 等) 以匹配 index.html 快取
+            // 忽略網址查詢參數 (?mode=a 等)以匹配 index.html 快取（僅原版路徑）
             const cachedResponse =
                 (await cache.match(request, { ignoreSearch: true })) ||
-                (request.mode === 'navigate' ? await cache.match('./index.html') : null);
+                (shouldUseRootNavigateFallback(request)
+                    ? await cache.match('./index.html')
+                    : null);
 
             if (cachedResponse) {
                 // 背景靜默更新快取 (若有網路時)
@@ -143,8 +171,7 @@ self.addEventListener('fetch', (event) => {
                 }
                 return networkResponse;
             } catch (err) {
-                // 導覽請求在極端狀況下退回 index.html
-                if (request.mode === 'navigate') {
+                if (shouldUseRootNavigateFallback(request)) {
                     const fallback = await cache.match('./index.html');
                     if (fallback) return fallback;
                 }
