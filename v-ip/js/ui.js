@@ -12,7 +12,22 @@ const QMSUI = (() => {
 
     const MOTION_CLASS = 'char-motion-6';
     const MAIN_REVEAL_PENDING_MS = 480;
+    const MAIN_POP_IN_MS = 400;
     let charSwitchTimer = null;
+    let firstCallCharTimer = null;
+
+    function clearFirstCallCharTimer() {
+        if (firstCallCharTimer) {
+            clearTimeout(firstCallCharTimer);
+            firstCallCharTimer = null;
+        }
+    }
+
+    function clearFirstCallRevealClasses(banner) {
+        if (!banner) return;
+        banner.classList.remove('char-reveal-pending', 'char-reveal-instant');
+        clearFirstCallCharTimer();
+    }
 
     function preloadCharacters() {
         Object.keys(CHAR_PATHS).forEach((key) => {
@@ -209,6 +224,7 @@ const QMSUI = (() => {
             if (banner) {
                 banner.classList.add('standby-mode');
                 banner.classList.remove('main-reveal-pending');
+                clearFirstCallRevealClasses(banner);
             }
             if (mainEl) mainEl.textContent = '';
             renderCharacter(null, false);
@@ -219,10 +235,23 @@ const QMSUI = (() => {
         if (banner) {
             banner.classList.remove('standby-mode');
             if (isFirstCall && withEffects) {
-                banner.classList.add('main-reveal-pending');
+                clearFirstCallRevealClasses(banner);
+                banner.classList.add('main-reveal-pending', 'char-reveal-pending');
                 window.setTimeout(() => {
                     banner.classList.remove('main-reveal-pending');
                 }, MAIN_REVEAL_PENDING_MS);
+                const charRevealMs = MAIN_REVEAL_PENDING_MS + MAIN_POP_IN_MS;
+                firstCallCharTimer = window.setTimeout(() => {
+                    firstCallCharTimer = null;
+                    banner.classList.add('char-reveal-instant');
+                    banner.classList.remove('char-reveal-pending');
+                    if (state.currentChar) {
+                        renderCharacter(state.currentChar, true);
+                    }
+                    window.setTimeout(() => {
+                        banner.classList.remove('char-reveal-instant');
+                    }, 1200);
+                }, charRevealMs);
             }
         }
 
@@ -236,7 +265,10 @@ const QMSUI = (() => {
         }
 
         if (state.currentChar) {
-            renderCharacter(state.currentChar, isFirstCall);
+            const deferCharOnFirstReveal = isFirstCall && withEffects;
+            if (!deferCharOnFirstReveal) {
+                renderCharacter(state.currentChar, isFirstCall);
+            }
         }
 
         renderHistory(state, animConfig, withEffects);

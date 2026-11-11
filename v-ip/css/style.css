@@ -181,11 +181,20 @@ html, body {
     transform: translate(-50%, -50%) scale(0.75);
 }
 
-#qms-banner.main-reveal-pending .main-number-area,
-#qms-banner.main-reveal-pending .character-area {
+#qms-banner.main-reveal-pending .main-number-area {
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none;
+}
+
+#qms-banner.char-reveal-pending .character-area {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none;
+}
+
+#qms-banner.char-reveal-instant .character-area {
+    transition: none;
 }
 
 .standby-mode .main-number-area,
