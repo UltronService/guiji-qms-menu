@@ -13,15 +13,16 @@ const QMSMenuBoard = (() => {
     /** 官方稿兩段間距（2160 寬下 62px → 1080 為 31px） */
     const OFFICIAL_BAND_GAP = 31;
 
+    const SLIDE1_H = OFFICIAL_BAND_GAP + BAND1_H;
+    const SLIDE2_H = OFFICIAL_BAND_GAP + BAND2_H;
+
     function initFooterRotate() {
         const footer = document.getElementById('menu-footer');
         const track = document.getElementById('menu-footer-track');
         if (!footer || !track) return;
 
-        const footerBandTopPad = 0;
-        const yBand1 = footerBandTopPad;
-        const band2Top = BAND1_H + OFFICIAL_BAND_GAP;
-        const yBand2 = footerBandTopPad - band2Top;
+        const yBand1 = 0;
+        const yBand2 = -SLIDE1_H;
 
         let showBand2 = false;
 
@@ -47,7 +48,10 @@ const QMSMenuBoard = (() => {
     return {
         init,
         FOOTER_ROTATE_MS,
-        FOOTER_TRANSITION_MS
+        FOOTER_TRANSITION_MS,
+        FOOTER_VIEWPORT_H,
+        SLIDE1_H,
+        SLIDE2_H
     };
 })();
 
