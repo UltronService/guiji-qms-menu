@@ -1,0 +1,13 @@
+{
+  "font": "'Nunito', sans-serif",
+  "bannerOpacity": "1.00",
+  "displayMode": "grid-b",
+  "currentLayout": "horizontal",
+  "gridBLayout": "b1",
+  "h1Dur": 0.5,
+  "h1Bounce": 1.0,
+  "h1X": 0,
+  "h2Delay": 0,
+  "h2X": 0,
+  "h2Bounce": 1.0
+}
