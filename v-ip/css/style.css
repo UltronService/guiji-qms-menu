@@ -143,8 +143,8 @@ html, body {
     width: 1080px;
     height: 288px;
     background-color: rgba(246, 245, 239, var(--banner-opacity));
-    border-bottom: 1px solid rgba(71, 78, 37, 0.22);
-    box-shadow: 0 3px 10px rgba(71, 78, 37, 0.07);
+    border-bottom: none;
+    box-shadow: none;
     z-index: 10;
     overflow: hidden;
 }
@@ -155,7 +155,7 @@ html, body {
     left: 50%;
     width: 280px;
     height: 94px;
-    transform: translate(-50%, -50%) scale(1.6);
+    transform: translate(-50%, calc(-50% - 12px)) scale(1.6);
     transform-origin: center center;
     display: flex;
     justify-content: center;
@@ -178,7 +178,7 @@ html, body {
 #qms-banner:not(.standby-mode) .logo-area {
     opacity: 0;
     visibility: hidden;
-    transform: translate(-50%, -50%) scale(0.75);
+    transform: translate(-50%, calc(-50% - 12px)) scale(0.75);
 }
 
 #qms-banner.main-reveal-pending .main-number-area {
@@ -209,7 +209,7 @@ html, body {
     position: absolute;
     left: 495px;
     top: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, calc(-50% - 12px));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -252,7 +252,7 @@ html, body {
     position: absolute;
     left: 60px;
     top: 50%;
-    transform: translateY(-50%);
+    transform: translateY(calc(-50% - 12px));
     width: 264px;
     height: 224px;
     display: flex;
@@ -334,7 +334,7 @@ html, body {
     position: absolute;
     right: 60px;
     top: 50%;
-    transform: translateY(-50%);
+    transform: translateY(calc(-50% - 12px));
     width: 346px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -417,6 +417,14 @@ html, body {
     overflow: hidden;
 }
 
+.menu-banner-breathing {
+    flex: 0 0 16px;
+    width: 1080px;
+    height: 16px;
+    flex-shrink: 0;
+    background-color: #fff;
+}
+
 .menu-drinks {
     flex: 0 0 1366px;
     width: 1080px;
@@ -448,6 +456,20 @@ html, body {
     transition: transform 0.5s ease-in-out;
 }
 
+.menu-footer-slide {
+    display: block;
+    width: 1080px;
+    flex-shrink: 0;
+}
+
+.menu-footer-slide--band1 {
+    height: 224px;
+}
+
+.menu-footer-slide--band2 {
+    height: 239px;
+}
+
 .menu-footer-band {
     display: block;
     width: 1080px;
@@ -475,17 +497,17 @@ html, body {
 body.client-preview #client-clear-history {
     position: absolute;
     left: 16px;
-    bottom: 12px;
+    top: 14px;
     z-index: 30;
-    padding: 8px 14px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #474e25;
-    background: rgba(246, 245, 239, 0.94);
-    border: 1px solid rgba(71, 78, 37, 0.32);
-    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(71, 78, 37, 0.72);
+    background: rgba(246, 245, 239, 0.55);
+    border: 1px solid rgba(71, 78, 37, 0.18);
+    border-radius: 4px;
     cursor: pointer;
-    box-shadow: 0 1px 4px rgba(71, 78, 37, 0.12);
+    box-shadow: none;
     font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
     line-height: 1.2;
 }
