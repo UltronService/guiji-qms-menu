@@ -2,7 +2,7 @@
  * v-ip Service Worker — 離線預快取（含共用根目錄 assets）
  */
 
-const CACHE_NAME = 'guiji-qms-vip-offline-v8';
+const CACHE_NAME = 'guiji-qms-vip-offline-v9';
 
 const PRECACHE_ASSETS = [
     './',
@@ -13,14 +13,17 @@ const PRECACHE_ASSETS = [
     './js/scanner.js',
     './js/ui.js',
     './js/app.js',
+    './js/menu-board.js',
     './sw.js',
+    './assets/menu-drinks-1080.jpg',
+    './assets/menu-footer-band-1.jpg',
+    './assets/menu-footer-band-2.jpg',
     './assets/chars/char-1.png',
     './assets/chars/char-2.png',
     './assets/chars/char-3.png',
     './assets/chars/char-4.png',
     './client/index.html',
     './client/js/client-app.js',
-    '../assets/menu.jpg',
     '../assets/logo2.svg',
     '../assets/fonts/montserrat-700.woff2',
     '../assets/fonts/montserrat-800.woff2',

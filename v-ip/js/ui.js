@@ -298,7 +298,7 @@ const QMSUI = (() => {
         if (!parent || parent.querySelector('.no-image-text')) return;
         const div = document.createElement('div');
         div.className = 'no-image-text';
-        div.textContent = '請確認 assets/menu.jpg 檔案';
+        div.textContent = '請確認 v-ip/assets 菜單裁切圖檔';
         parent.appendChild(div);
     }
 

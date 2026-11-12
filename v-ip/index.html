@@ -16,7 +16,7 @@
         if (!parent || parent.querySelector('.no-image-text')) return;
         var div = document.createElement('div');
         div.className = 'no-image-text';
-        div.textContent = '請確認 assets/menu.jpg 檔案';
+        div.textContent = '請確認 v-ip/assets 菜單裁切圖檔';
         parent.appendChild(div);
     }
     </script>
@@ -41,7 +41,16 @@
     </div>
 
     <div id="menu-area">
-        <img src="../assets/menu.jpg" alt="電子菜單" onerror="showNoImage(this)">
+        <div class="menu-drinks">
+            <img src="assets/menu-drinks-1080.jpg" alt="飲品菜單" width="1080" height="1366" onerror="showNoImage(this)">
+        </div>
+        <div class="menu-footer" id="menu-footer" aria-live="polite">
+            <div class="menu-footer-track" id="menu-footer-track">
+                <img class="menu-footer-band menu-footer-band--band1" src="assets/menu-footer-band-1.jpg" alt="客製調整與加料" width="1080" height="193">
+                <div class="menu-footer-gap" aria-hidden="true"></div>
+                <img class="menu-footer-band menu-footer-band--band2" src="assets/menu-footer-band-2.jpg" alt="糖度、冰量、圖例與 QR" width="1080" height="208">
+            </div>
+        </div>
     </div>
 
     <div id="debug-panel">
@@ -206,6 +215,7 @@
     </div>
 </div>
 
+<script src="js/menu-board.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/scanner.js"></script>
 <script src="js/ui.js"></script>
