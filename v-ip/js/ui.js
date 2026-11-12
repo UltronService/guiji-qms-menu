@@ -3,11 +3,18 @@
  */
 
 const QMSUI = (() => {
+    function charAssetUrl(name) {
+        const base = window.location.pathname.includes('/client/')
+            ? '../assets/chars/'
+            : 'assets/chars/';
+        return base + name + '.png';
+    }
+
     const CHAR_PATHS = {
-        'char-1': 'assets/chars/char-1.png',
-        'char-2': 'assets/chars/char-2.png',
-        'char-3': 'assets/chars/char-3.png',
-        'char-4': 'assets/chars/char-4.png'
+        'char-1': charAssetUrl('char-1'),
+        'char-2': charAssetUrl('char-2'),
+        'char-3': charAssetUrl('char-3'),
+        'char-4': charAssetUrl('char-4')
     };
 
     const MOTION_CLASS = 'char-motion-6';
@@ -387,6 +394,31 @@ const QMSUI = (() => {
         panel.style.display = isDebugPanelVisible(panel) ? 'none' : 'block';
     }
 
+    function pushAnimConfigToRoot(animConfig) {
+        const ease1 = (animConfig.h1Bounce > 1.01 || animConfig.h1Bounce < 0.99)
+            ? `cubic-bezier(0.34, ${animConfig.h1Bounce}, 0.64, 1)`
+            : 'ease-out';
+        const ease2 = (animConfig.h2Bounce > 1.01 || animConfig.h2Bounce < 0.99)
+            ? `cubic-bezier(0.34, ${animConfig.h2Bounce}, 0.64, 1)`
+            : 'ease-out';
+        animConfig.h1Ease = ease1;
+        animConfig.h2Ease = ease2;
+        animConfig.h2Dur = animConfig.h1Dur;
+
+        const root = document.documentElement;
+        root.style.setProperty('--hist1-dur', animConfig.h1Dur + 's');
+        root.style.setProperty('--hist1-ease', animConfig.h1Ease);
+        root.style.setProperty('--hist1-x', animConfig.h1X + 'px');
+        root.style.setProperty('--hist2-dur', animConfig.h2Dur + 's');
+        root.style.setProperty('--hist2-delay', animConfig.h2Delay + 's');
+        root.style.setProperty('--hist2-ease', animConfig.h2Ease);
+        root.style.setProperty('--hist2-x', animConfig.h2X + 'px');
+    }
+
+    function applyAnimConfig(animConfig) {
+        pushAnimConfigToRoot(animConfig);
+    }
+
     function syncAnimParamsFromDOM(animConfig) {
         const h1DurEl = document.getElementById('h1-dur');
         if (!h1DurEl) return;
@@ -405,31 +437,14 @@ const QMSUI = (() => {
         document.getElementById('h2-x-val').textContent = h2X + 'px';
         document.getElementById('h2-bounce-val').textContent = h2Bounce === 1.0 ? '1.0x (無回彈)' : h2Bounce.toFixed(2) + 'x (彈性)';
 
-        const ease1 = (h1Bounce > 1.01 || h1Bounce < 0.99)
-            ? `cubic-bezier(0.34, ${h1Bounce}, 0.64, 1)`
-            : 'ease-out';
-        const ease2 = (h2Bounce > 1.01 || h2Bounce < 0.99)
-            ? `cubic-bezier(0.34, ${h2Bounce}, 0.64, 1)`
-            : 'ease-out';
-
         animConfig.h1Dur = h1Dur;
-        animConfig.h1Ease = ease1;
         animConfig.h1Bounce = h1Bounce;
         animConfig.h1X = h1X;
-        animConfig.h2Dur = h1Dur;
-        animConfig.h2Ease = ease2;
         animConfig.h2Bounce = h2Bounce;
         animConfig.h2Delay = h2Delay;
         animConfig.h2X = h2X;
 
-        const root = document.documentElement;
-        root.style.setProperty('--hist1-dur', animConfig.h1Dur + 's');
-        root.style.setProperty('--hist1-ease', animConfig.h1Ease);
-        root.style.setProperty('--hist1-x', animConfig.h1X + 'px');
-        root.style.setProperty('--hist2-dur', animConfig.h2Dur + 's');
-        root.style.setProperty('--hist2-delay', animConfig.h2Delay + 's');
-        root.style.setProperty('--hist2-ease', animConfig.h2Ease);
-        root.style.setProperty('--hist2-x', animConfig.h2X + 'px');
+        pushAnimConfigToRoot(animConfig);
     }
 
     const PRESET_CONFIGS = {
@@ -467,6 +482,7 @@ const QMSUI = (() => {
         showDebugPanelOnLoad,
         toggleDebugPanel,
         syncAnimParamsFromDOM,
+        applyAnimConfig,
         applyPresetValues
     };
 })();
