@@ -18,10 +18,10 @@ const QMSMenuBoard = (() => {
         const track = document.getElementById('menu-footer-track');
         if (!footer || !track) return;
 
-        const yBand1 = (FOOTER_VIEWPORT_H - BAND1_H) / 2;
+        const footerBandTopPad = 0;
+        const yBand1 = footerBandTopPad;
         const band2Top = BAND1_H + OFFICIAL_BAND_GAP;
-        const band2Center = band2Top + BAND2_H / 2;
-        const yBand2 = FOOTER_VIEWPORT_H / 2 - band2Center;
+        const yBand2 = footerBandTopPad - band2Top;
 
         let showBand2 = false;
 
