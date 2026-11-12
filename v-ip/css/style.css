@@ -408,21 +408,74 @@ html, body {
     left: 0;
     width: 1080px;
     height: 1632px;
-    background-color: #111;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 8px 0;
+    background-color: #f6f5ef;
+    overflow: hidden;
 }
 
-#menu-area img {
+.menu-drinks {
+    flex: 0 0 1366px;
     width: 1080px;
-    height: 1632px;
-    object-fit: cover;
+    height: 1366px;
+    overflow: hidden;
+}
+
+.menu-drinks img {
     display: block;
+    width: 1080px;
+    height: 1366px;
+    object-fit: fill;
+}
+
+.menu-footer {
+    position: relative;
+    flex: 0 0 250px;
+    width: 1080px;
+    height: 250px;
+    margin-top: 8px;
+    background-color: #f6f5ef;
+    overflow: hidden;
+}
+
+.menu-footer-track {
+    width: 1080px;
+    will-change: transform;
+    transition: transform 0.5s ease-in-out;
+}
+
+.menu-footer-band {
+    display: block;
+    width: 1080px;
+    height: auto;
+    pointer-events: none;
+    flex-shrink: 0;
+}
+
+.menu-footer-band--band1 {
+    height: 193px;
+}
+
+.menu-footer-band--band2 {
+    height: 208px;
+}
+
+.menu-footer-gap {
+    width: 1080px;
+    height: 31px;
+    flex-shrink: 0;
+    background-color: #f6f5ef;
 }
 
 .no-image-text {
     color: #666;
     text-align: center;
-    line-height: 1632px;
-    font-size: 48px;
+    line-height: 1.4;
+    padding: 24px;
+    font-size: 36px;
 }
 
 #debug-panel {
