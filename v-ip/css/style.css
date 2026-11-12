@@ -142,7 +142,7 @@ html, body {
     left: 0;
     width: 1080px;
     height: 288px;
-    background-color: rgba(246, 245, 239, var(--banner-opacity));
+    background-color: #ffffff;
     border-bottom: none;
     box-shadow: none;
     z-index: 10;
@@ -207,14 +207,14 @@ html, body {
 
 .main-number-area {
     position: absolute;
-    left: 495px;
+    left: 378px;
     top: 50%;
     transform: translate(-50%, calc(-50% - 12px));
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 264px;
-    max-width: 264px;
+    width: 292px;
+    max-width: 292px;
     z-index: 20;
     white-space: nowrap;
 }
@@ -250,10 +250,10 @@ html, body {
 
 .character-area {
     position: absolute;
-    left: 60px;
+    left: 7px;
     top: 50%;
     transform: translateY(calc(-50% - 12px));
-    width: 264px;
+    width: 221px;
     height: 224px;
     display: flex;
     justify-content: center;
@@ -332,15 +332,16 @@ html, body {
 
 .history-area {
     position: absolute;
-    right: 60px;
+    right: auto;
+    left: 579px;
     top: 50%;
     transform: translateY(calc(-50% - 12px));
-    width: 346px;
+    width: 487px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, 54px);
-    column-gap: 20px;
-    row-gap: 14px;
+    grid-template-rows: repeat(2, 64px);
+    column-gap: 28px;
+    row-gap: 28px;
     align-items: center;
     justify-items: center;
     z-index: 20;
@@ -349,12 +350,12 @@ html, body {
 .history-item {
     font-family: var(--selected-font);
     color: var(--brand-history-color);
-    font-size: 54px;
+    font-size: 64px;
     font-weight: 700;
     white-space: nowrap;
     line-height: 1;
     opacity: 0.92;
-    min-height: 54px;
+    min-height: 64px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -503,7 +504,7 @@ body.client-preview #client-clear-history {
     font-size: 12px;
     font-weight: 600;
     color: rgba(71, 78, 37, 0.72);
-    background: rgba(246, 245, 239, 0.55);
+    background: rgba(71, 78, 37, 0.06);
     border: 1px solid rgba(71, 78, 37, 0.18);
     border-radius: 4px;
     cursor: pointer;
